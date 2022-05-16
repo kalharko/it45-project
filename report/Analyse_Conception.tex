@@ -1,0 +1,124 @@
+%-------------------------------
+% Importer les packages et options du document
+%-------------------------------
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage [T1] {fontenc}
+
+% Geometry
+\usepackage{geometry}
+\geometry{a4paper}
+\geometry{margin=2.5cm}
+
+% Autres
+\usepackage{verbatim}
+\usepackage{tcolorbox}
+\usepackage{tabularx}
+\usepackage{multirow}
+
+% Hypper links package and it's configuration
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+
+%-------------------------------
+% Commandes custom
+%-------------------------------
+% Commande de saut, \myjump{taille du saut en cm} ou \myjump sans arguments
+\newcommand{\myjump}[1][0]{\mbox{}\\[#1cm]}
+
+% Pour faire une liste avec des paragraphes
+%\biglist{Titre du paragraphe} suite du paragraphe
+\newcommand{\biglist}[1]{\myjump[0]\indent\textsc{\textbf{#1}}}
+\newcommand{\scbf}[1]{\textsc{\textbf{#1}}}
+
+
+% Pour faire un commentaire à propos de ce qui devrait être écrit
+%\mycomment{Commentaire}
+\newcommand{\mycomment}[1]{
+\begin{center}
+    \small\sc
+    [#1]
+\end{center}
+}
+
+% Pour inclure une figure, elle sera automatiquement numérotée
+% \myfigure{chemin ver l'image}{Titre}
+\newcounter{nbFigures}
+\setcounter{nbFigures}{1}
+ \newcommand{\myfigure}[2]{
+\begin{center}
+    \fbox{
+    \includegraphics[width=\linewidth]{#1}}\newline
+    \emph{Figure \arabic{nbFigures} : #2}
+    \stepcounter{nbFigures}
+\end{center}
+}
+
+
+
+%--------------------------------
+% Options de la page de garde, début du document, table des matière
+%--------------------------------
+\title{\textbf{Dossier d'Analyse Conception}}
+\author{Adrien Burgun, Oscar Dewasmes}
+\date{UTBM - IT45 - Printemps 2022} % Si commenté, date du jour est utilisé
+
+
+\begin{document}
+
+\maketitle
+
+
+\newpage
+\tableofcontents
+
+
+\newpage
+\section{Introduction}
+
+
+\newpage
+\section{Analyse}
+
+
+
+
+\newpage
+\section{Conception}
+\subsection{Décisions techniques}
+
+\subsection{Algorithmes}
+
+
+
+
+
+
+
+
+
+
+\newpage
+\section{Conclusion}
+
+
+
+
+
+\end{document}
+
+
+
+
+
+
+
+
