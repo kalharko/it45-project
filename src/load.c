@@ -9,6 +9,7 @@
 int load_distance(size_t row, size_t col, char *filename, float **data) {
     FILE *file;
     file = fopen(filename, "r");
+    assert(file != NULL);
 
     int i = 0;
     char line[4098];

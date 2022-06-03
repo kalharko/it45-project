@@ -1,6 +1,7 @@
 #ifndef DEFS_H
 #define DEFS_H
 
+#include <stdlib.h>
 #include <stdint.h>
 
 enum skill {
@@ -33,5 +34,20 @@ struct mission {
     skill_t skill;
     speciality_t speciality;
 } typedef mission_t;
+
+struct problem {
+    agent_t* agents;
+    size_t n_agents;
+
+    mission_t* missions;
+    size_t n_missions;
+} typedef problem_t;
+
+struct solution {
+    size_t* assignements; // assignements[i] == j <=> agent[j] goes to mission[i]
+
+    // Information used by the different algorithms
+    float score;
+} typedef solution_t;
 
 #endif // DEFS_H

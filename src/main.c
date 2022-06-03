@@ -4,7 +4,8 @@
 #include <assert.h>
 #include "defs.h"
 #include "load.h"
-
+#include "initial.h"
+#include "optimize.h"
 
 int main(int argc, char **argv) {
     char path[128] = "../Instances/45-4/"; // will be replaced by argument
