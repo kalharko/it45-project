@@ -1,28 +1,12 @@
-
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
-struct agent
-{
-   int id;
-   int skill; // LSF = 0, LPC = 1
-   int speciality;
-   int hours;
-} typedef agent;
+#include "load.h"
+#include "defs.h"
 
-struct mission
-{
-    int id;
-    int day;
-    int start_time; // in minit
-    int end_time; // in minit
-    int skill;
-    int speciality;
-} typedef mission;
-
-
-int load_distance(int row, int col, char *filename, float **data){
+int load_distance(size_t row, size_t col, char *filename, float **data) {
     FILE *file;
     file = fopen(filename, "r");
 
@@ -35,7 +19,7 @@ int load_distance(int row, int col, char *filename, float **data){
 
         int j = 0;
         const char* tok;
-        for (tok = strtok(line, ","); tok && *tok; j++, tok = strtok(NULL, ","))
+        for (tok = strtok(line, ","); tok && *tok && j < col; j++, tok = strtok(NULL, ","))
         {
             data[i][j] = atof(tok);
             //printf("%0.1f\t", data[i][j]);
@@ -50,15 +34,22 @@ int load_distance(int row, int col, char *filename, float **data){
     return 0;
 }
 
-int load_agents(char *filename, agent agents[], int nb_agent) {
-    FILE *file;
-    file = fopen(filename, "r");
+int load_agents(char *filename, agent_t agents[], int nb_agent) {
+    FILE *file = fopen(filename, "r");
+
+    assert(file != NULL);
 
     int i = 0, j, head;
     char buffer[50];
     char line[4098];
-    char speciality[5][20] = {"Jardinage", "Mecanique", "Menuiserie", "Musique", "Electricite"};
-    while (fgets(line, 4098, file) && (i < nb_agent))
+    const char* raw_specialities[5] = {
+        "Jardinage",
+        "Mecanique",
+        "Menuiserie",
+        "Musique",
+        "Electricite"
+    };
+    while (fgets(line, sizeof line, file) && (i < nb_agent))
     {
         head = 0;
         j = 0;
@@ -95,7 +86,7 @@ int load_agents(char *filename, agent agents[], int nb_agent) {
         buffer[j] = '\0';
         head++;
         j = 0;
-        while (strcmp(buffer, speciality[i]) != 0) {
+        while (strcmp(buffer, raw_specialities[i]) != 0) {
             j++;
         }
         agents[i].speciality = j;
@@ -114,43 +105,5 @@ int load_agents(char *filename, agent agents[], int nb_agent) {
     }
 
     fclose(file);
-    return 0;
-}
-
-
-
-
-
-
-int main(int argc, char **argv)
-{
-
-
-    char path[128] = "./Instances/45-4/"; // will be replaced by argument
-    int nb_agent = 4;
-    int nb_mission = 45;
-
-    // // Open data from csv files
-    // Distance
-    float **distance_csv;
-    distance_csv = (float **)malloc(45 * sizeof(float *));
-    for (int i = 0; i < 45; ++i){
-        distance_csv[i] = (float *)malloc(45 * sizeof(float));
-    }
-    load_distance(45, 45, strcat(path, "Distances.csv"), distance_csv);
-
-    // Agent
-    agent agents[nb_agent];
-    load_agents(strcat(path, "Intervenants.csv"), agents, nb_agent);
-
-    for (int i=0; i<nb_agent; i++) {
-        printf("%d, %d, %d, %d\n", agents[i].id, agents[i].skill, agents[i].speciality, agents[i].hours);
-    }
-
-
-    // Missions
-
-
-
     return 0;
 }

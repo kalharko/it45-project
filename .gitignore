@@ -274,3 +274,20 @@ TSWLatexianTemp*
 
 # Makeindex log files
 *.lpz
+
+# More latex stuff
+*.pdf
+*.log
+*.aux
+
+# C stuff
+*.o
+*.exe
+*.a
+*.so
+*.d
+build/
+
+# My random stuff
+
+InstanceGenerator-*
