@@ -45,6 +45,7 @@ struct problem {
 
 struct solution {
     size_t* assignements; // assignements[i] == j <=> agent[j] goes to mission[i]
+    size_t n_assignements;
 
     // Information used by the different algorithms
     float score;

@@ -1,5 +1,9 @@
 #include <unity.h>
+
+#include "common.c"
+
 #include "load.c"
+#include "initial.c"
 
 void setUp(void) {}
 
@@ -14,6 +18,8 @@ int main() {
 
     RUN_TEST(test_hello);
     RUN_TEST(test_load_distance);
+
+    test_initial();
 
     UNITY_END();
 }
