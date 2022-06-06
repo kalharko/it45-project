@@ -22,6 +22,8 @@ add_executable(it45-project-test
     test/main.c
     ${SRC_FILES}
 )
-# TODO: use cmake's find_library
-include_directories(/usr/include/unity)
-target_link_libraries(it45-project-test unity)
+
+
+find_package(unity REQUIRED CONFIG)
+
+target_link_libraries(it45-project-test unity::framework)
