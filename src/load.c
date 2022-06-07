@@ -43,15 +43,9 @@ int load_agents(char *filename, agent_t agents[], int nb_agent) {
     int i = 0, j, head;
     char buffer[50];
     char line[4098];
-    const char* raw_specialities[5] = {
-        "Jardinage",
-        "Mecanique",
-        "Menuiserie",
-        "Musique",
-        "Electricite"
-    };
     while (fgets(line, sizeof line, file) && (i < nb_agent))
     {
+        // agents.id
         head = 0;
         j = 0;
         while (line[head] != ',') {
@@ -63,6 +57,7 @@ int load_agents(char *filename, agent_t agents[], int nb_agent) {
         head++;
         agents[i].id = atoi(buffer);
 
+        // agents.skill
         j = 0;
         while (line[head] != ',') {
             buffer[j] = line[head];
@@ -72,12 +67,13 @@ int load_agents(char *filename, agent_t agents[], int nb_agent) {
         buffer[j] = '\0';
         head++;
         if (strcmp(buffer, "LSF") == 0) {
-            agents[i].skill = 0;
+            agents[i].skill = LSF;
         }
         else {
-            agents[i].skill = 1;
+            agents[i].skill = LPC;
         }
 
+        // agents.speciality
         j = 0;
         while (line[head] != ',') {
             buffer[j] = line[head];
@@ -86,11 +82,24 @@ int load_agents(char *filename, agent_t agents[], int nb_agent) {
         }
         buffer[j] = '\0';
         head++;
-        j = 0;
-        while (strcmp(buffer, raw_specialities[i]) != 0) {
-            j++;
+        if (strcmp(buffer, "Jardinage")==0) {
+            agents[i].speciality = JARDINAGE;
         }
-        agents[i].speciality = j;
+        else if(strcmp(buffer, "Mecanique")==0){
+            agents[i].speciality = MECANIQUE;
+        }
+        else if(strcmp(buffer, "Menuiserie")==0){
+            agents[i].speciality = MENUISERIE;
+        }
+        else if(strcmp(buffer, "Electricite")==0){
+            agents[i].speciality = ELECTRICITE;
+        }
+        else if(strcmp(buffer, "Musique")==0){
+            agents[i].speciality = MUSIQUE;
+        }
+        else {
+            return 1;
+        }
 
         // agents.hours
         j = 0;
