@@ -45,8 +45,9 @@ int load_agents(char *filename, agent_t agents[], int nb_agent) {
     char line[4098];
     while (fgets(line, sizeof line, file) && (i < nb_agent))
     {
-        // agents.id
         head = 0;
+
+        // agents.id
         j = 0;
         while (line[head] != ',') {
             buffer[j] = line[head];
@@ -103,7 +104,7 @@ int load_agents(char *filename, agent_t agents[], int nb_agent) {
 
         // agents.hours
         j = 0;
-        while (line[head] != '\n') {
+        while (line[head] != '\n' && line[head] != '\r') {
             buffer[j] = line[head];
             j++;
             head++;
@@ -111,6 +112,118 @@ int load_agents(char *filename, agent_t agents[], int nb_agent) {
         buffer[j] = '\0';
         head++;
         agents[i].hours = atoi(buffer);
+
+        i++;
+    }
+
+    fclose(file);
+    return 0;
+}
+
+
+int load_missions(char *filename, mission_t missions[], int nb_mission)
+{
+    FILE *file = fopen(filename, "r");
+    assert(file != NULL);
+
+    int i = 0, j, head;
+    char buffer[50];
+    char line[4098];
+    while (fgets(line, sizeof line, file) && (i < nb_mission))
+    {
+        head = 0;
+
+        // mission.id
+        j = 0;
+        while (line[head] != ',') {
+            buffer[j] = line[head];
+            j++;
+            head++;
+        }
+        buffer[j] = '\0';
+        head++;
+        missions[i].id = atoi(buffer);
+
+        // mission.day
+        j = 0;
+        while (line[head] != ',') {
+            buffer[j] = line[head];
+            j++;
+            head++;
+        }
+        buffer[j] = '\0';
+        head++;
+        missions[i].day = atoi(buffer);
+
+        // mission.start_time
+        j = 0;
+        while (line[head] != ',') {
+            buffer[j] = line[head];
+            j++;
+            head++;
+        }
+        buffer[j] = '\0';
+        head++;
+        missions[i].start_time = atoi(buffer);
+
+        // mission.end_time
+        j = 0;
+        while (line[head] != ',') {
+            buffer[j] = line[head];
+            j++;
+            head++;
+        }
+        buffer[j] = '\0';
+        head++;
+        missions[i].end_time = atoi(buffer);
+
+        // mission.skill
+        j = 0;
+        while (line[head] != ',') {
+            buffer[j] = line[head];
+            j++;
+            head++;
+        }
+        buffer[j] = '\0';
+        head++;
+        if (strcmp(buffer, "LSF") == 0) {
+            missions[i].skill = LSF;
+        }
+        else if (strcmp(buffer, "LPC") == 0){
+            missions[i].skill = LPC;
+        }
+        else {
+            return 1;
+        }
+
+        // mission.speciality
+        j = 0;
+        while (line[head] != '\n' && line[head] != '\r') {
+            buffer[j] = line[head];
+            j++;
+            head++;
+        }
+        buffer[j] = '\0';
+        head++;
+        if (strcmp(buffer, "Jardinage")==0) {
+            missions[i].speciality = JARDINAGE;
+        }
+        else if(strcmp(buffer, "Mecanique")==0){
+            missions[i].speciality = MECANIQUE;
+        }
+        else if(strcmp(buffer, "Menuiserie")==0){
+            missions[i].speciality = MENUISERIE;
+        }
+        else if(strcmp(buffer, "Electricite")==0){
+            missions[i].speciality = ELECTRICITE;
+        }
+        else if(strcmp(buffer, "Musique")==0){
+            missions[i].speciality = MUSIQUE;
+        }
+        else {
+            return 1;
+        }
+
         i++;
     }
 

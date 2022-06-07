@@ -60,3 +60,20 @@ void test_load_agents(void) {
     TEST_ASSERT_EQUAL_INT(24, agents[2].hours);
     TEST_ASSERT_EQUAL_INT(24, agents[3].hours);
 }
+
+
+void test_load_missions(void) {
+
+    mission_t missions[45];
+
+    TEST_ASSERT_EQUAL_INT(
+        0,
+        load_missions("../Instances/45-4/Missions.csv", missions, 45)
+    );
+
+    // Test id
+    for (int i=0; i<45; i++) {
+    TEST_ASSERT_EQUAL_INT(i+1, missions[i].id);
+    }
+
+}
