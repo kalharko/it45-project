@@ -4,6 +4,7 @@
 
 #include "load.c"
 #include "initial.c"
+#include "optimize.c"
 
 void setUp(void) {}
 

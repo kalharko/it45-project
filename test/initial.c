@@ -2,8 +2,8 @@
 #include <stdbool.h>
 
 bool is_solution_assigned(solution_t* solution, size_t n_agents) {
-    for (size_t n = 0; n < solution->n_assignements; n++) {
-        if (solution->assignements[n] >= n_agents) return false;
+    for (size_t n = 0; n < solution->n_assignments; n++) {
+        if (solution->assignments[n] >= n_agents) return false;
     }
     return true;
 }
@@ -44,8 +44,8 @@ void test_build_naive(void) {
     solution_t solution = build_naive(&problem);
 
     TEST_ASSERT(is_solution_assigned(&solution, problem.n_agents));
-    TEST_ASSERT_EQUAL_INT(solution.assignements[0], 0);
-    TEST_ASSERT_EQUAL_INT(solution.assignements[1], 1);
+    TEST_ASSERT_EQUAL_INT(solution.assignments[0], 0);
+    TEST_ASSERT_EQUAL_INT(solution.assignments[1], 1);
 
     free_problem(problem);
 }

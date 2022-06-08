@@ -5,10 +5,10 @@
 solution_t new_solution(problem_t* problem) {
     assert(problem->n_missions > 0);
     solution_t res;
-    res.assignements = (size_t*)malloc(sizeof(size_t) * problem->n_missions);
+    res.assignments = (size_t*)malloc(sizeof(size_t) * problem->n_missions);
 
     for (size_t n = 0; n < problem->n_missions; n++) {
-        res.assignements[n] = SIZE_MAX;
+        res.assignments[n] = SIZE_MAX;
     }
 
     res.score = 0.0;
@@ -37,7 +37,7 @@ solution_t build_naive(problem_t* problem) {
         do {
             mission_t* mission = &problem->missions[available_missions[index2]];
             if (mission->skill == agent->skill && mission->speciality == agent->speciality) {
-                solution.assignements[available_missions[index2]] = agent_index;
+                solution.assignments[available_missions[index2]] = agent_index;
 
                 // available_missions.remove(index2)
                 for (size_t i = n_available_missions - 1; i > index2; i--) {

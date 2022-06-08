@@ -25,12 +25,9 @@ int main(int argc, char **argv) {
     agent_t agents[nb_agent];
     load_agents(strcat(path, "Intervenants.csv"), agents, nb_agent);
 
-    for (int i=0; i<nb_agent; i++) {
-        printf("%d, %d, %d, %d\n", agents[i].id, agents[i].skill, agents[i].speciality, agents[i].hours);
-    }
-
-
     // Missions
+    mission_t missions[nb_mission];
+    load_missions(strcat(path, "Intervenants.csv"), missions, nb_mission);
 
 
 

@@ -41,14 +41,17 @@ struct problem {
 
     mission_t* missions;
     size_t n_missions;
+
+    float **distances;
 } typedef problem_t;
 
 struct solution {
-    size_t* assignements; // assignements[i] == j <=> agent[j] goes to mission[i]
-    size_t n_assignements;
+    size_t* assignments; // assignements[i] == j <=> agent[j] goes to mission[i]
+    size_t n_assignments;
 
     // Information used by the different algorithms
     float score;
+    float distance_traveled;
 } typedef solution_t;
 
 #endif // DEFS_H
