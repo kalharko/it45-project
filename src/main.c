@@ -12,6 +12,9 @@ int main(int argc, char **argv) {
     int nb_agent = 4;
     int nb_mission = 45;
 
+    // Initializes random number generator */
+    srand((unsigned) time(&t));
+
     // // Open data from csv files
     // Distance
     float **distance_csv;

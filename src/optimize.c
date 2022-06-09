@@ -5,6 +5,23 @@ float score_solution(solution_t* solution, problem_t* problem) {
 }
 
 solution_t random_neighbor(solution_t* solution, problem_t* problem) {
+    int neighbor_agent = rand() % problem.n_agents;
+    int neighbor_mission = rand() % problem.n_missions;
+
+    int old_mission = solution.assignments[neighbor_agent];
+    solution.assignments[neighbor_agent] = neighbor_mission;
+
+    while (is_solution_valid(neighbor, problem) == false) {
+        // reverse the change
+        solution.assignments[neighbor_agent] = old_mission;
+
+        // generate new neighbor
+        neighbor_agent = rand() % problem.n_agents;
+        neighbor_mission = rand() % problem.n_missions;
+        old_mission = solution.assignments[neighbor_agent];
+        solution.assignments[neighbor_agent] = neighbor_mission;
+    }
+
     return *solution;
 }
 
@@ -62,6 +79,7 @@ bool is_solution_valid(solution_t solution, problem_t problem)
         // Check travel times
         float distance;
         float time;
+        solution.distance_traveled = 0;
         for (int day=1; day<6; day++) {
             int nb_assignment_day = 0;
             while (time_table[day][nb_assignment_day] != 0) {
