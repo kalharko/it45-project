@@ -15,15 +15,18 @@ add_executable(it45-project
 
 include_directories(src/)
 
+target_link_libraries(it45-project PRIVATE m) # Link math library
+
 # Testing project
+find_package(unity CONFIG)
 
-project(it45-project-test)
-add_executable(it45-project-test
-    test/main.c
-    ${SRC_FILES}
-)
+if (${unity_FOUND})
+    project(it45-project-test)
+    add_executable(it45-project-test
+        test/main.c
+        ${SRC_FILES}
+    )
 
+    target_link_libraries(it45-project-test unity::framework m)
 
-find_package(unity REQUIRED CONFIG)
-
-target_link_libraries(it45-project-test unity::framework)
+endif()
