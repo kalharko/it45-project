@@ -48,6 +48,11 @@ struct problem {
     double temperature;
     double temperature_mult;
     double temperature_threshold;
+
+    //Different objectives management
+    int current_objective;
+    float *validated_scores; //stores the scores for the objectives that must not change when
+                             //optimizing the next ones
 } typedef problem_t;
 
 struct solution {

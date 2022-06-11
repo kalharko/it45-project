@@ -53,7 +53,13 @@ int main(int argc, char **argv) {
 
 
     // // Launch optimization
-
+    // optimises for each objective
+    // solution_t solution = initial_solution;
+    // for (int i = 0; i < 3; i++) {
+    //     problem.current_objective = i;
+    //     problem.temperature = temperature;
+    //     solution = optimize_solution(solution_t solution, problem_t* problem)
+    // }
 
 
     // // Display and save result to file
