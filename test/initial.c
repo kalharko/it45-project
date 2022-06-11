@@ -3,7 +3,10 @@
 
 bool is_solution_assigned(solution_t* solution, size_t n_agents) {
     for (size_t n = 0; n < solution->n_assignments; n++) {
-        if (solution->assignments[n] >= n_agents) return false;
+        if (solution->assignments[n] >= n_agents) {
+            fprintf(stderr, "Solution %zu is unassigned!\n", n);
+            return false;
+        }
     }
     return true;
 }
@@ -51,5 +54,7 @@ void test_build_naive(void) {
 }
 
 void test_initial() {
+    UNITY_BEGIN();
     RUN_TEST(test_build_naive);
+    UNITY_END();
 }

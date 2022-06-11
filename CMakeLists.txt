@@ -6,6 +6,7 @@ set(SRC_FILES
     src/load.c
     src/initial.c
     src/optimize.c
+    src/utils.c
 )
 
 add_executable(it45-project

@@ -2,6 +2,7 @@
 #include <math.h>
 
 #include "optimize.h"
+#include "utils.h"
 
 float score_solution(solution_t* solution, problem_t* problem) {
     float score = 0;
@@ -48,31 +49,16 @@ solution_t random_neighbor(solution_t* solution, problem_t* problem) {
 solution_t optimize_solution(solution_t initial_solution, problem_t* problem) {
     solution_t current_solution = initial_solution;
     solution_t next_solution;
-    bool solution_accepted;
-    double current_score;
-    double delta_f;
 
     // runs until the recuit temperature is low enough
     while (problem->temperature > problem->temperature_threshold){
-        next_solution = random_neighbor(&current_solution, problem);
-        current_score = score_solution(&current_solution, problem);
-        delta_f = score_solution(&next_solution, problem) - current_score;
+        double current_score = score_solution(&current_solution, problem);
+        bool solution_accepted = false;
 
-        // check if the next solution is good
-        if (delta_f < 0) {
-            solution_accepted = true;
-        }
-        else if (rand() < exp(-(delta_f)/problem->temperature)){
-            solution_accepted = true;
-        }
-        else {
-            solution_accepted = false;
-        }
-
-        // search for another next solution if the first one was not good
-        while (!solution_accepted) {
+        // search for a solution until it is good enough
+        do {
             next_solution = random_neighbor(&current_solution, problem);
-            delta_f = score_solution(&next_solution, problem) - current_score;
+            double delta_f = score_solution(&next_solution, problem) - current_score;
 
             if (delta_f < 0) {
                 solution_accepted = true;
@@ -80,78 +66,47 @@ solution_t optimize_solution(solution_t initial_solution, problem_t* problem) {
             else if (rand() < exp(-(delta_f)/problem->temperature)){
                 solution_accepted = true;
             }
-        }
+        } while (!solution_accepted);
 
         current_solution = next_solution;
         problem->temperature *= problem->temperature_mult;
     }
+
+    return current_solution;
 }
 
-
-bool is_solution_valid(solution_t* solution, problem_t* problem)
-{
+// TODO: split into multiple functions for each condition
+bool is_solution_valid(solution_t* solution, const problem_t* problem) {
     // Check that each agent can go to each of his assignments
-    for (int i=0; i<problem->n_agents; i++) {
+    for (int agent_index = 0; agent_index < problem->n_agents; agent_index++) {
+        timetable_t time_table = build_time_table(solution, problem, agent_index);
 
-        // time_table[day of the week][mission] for one agent
-        uint8_t **time_table;
-        time_table = (uint8_t **)malloc(6 * sizeof(uint8_t *));
-        for (int i = 0; i < 5; ++i){
-            time_table[i] = (uint8_t *)malloc(solution->n_assignments * sizeof(uint8_t));
-        }
-
-        int head_assignments = 0;
-        // Gather an agent's missions
-        for (int j=0; j<solution->n_assignments; i++) {
-            if (solution->assignments[j] == i) {
-                // Fill the time_table so the assignments are in order
-                for (int period=0; period < solution->n_assignments; period++) {
-                    if (time_table[problem->missions[j].day][period] == 0) {
-                        time_table[problem->missions[j].day][period] = j;
-                        break;
-                    }
-                    else if (problem->missions[time_table[problem->missions[j].day][period]].end_time <= problem->missions->start_time) {
-                        period += 1;
-                        int temp = time_table[problem->missions[j].day][period];
-                        int temp2;
-                        time_table[problem->missions[j].day][period] = j;
-                        period += 1;
-
-                        while (temp != 0) {
-                            temp2 = time_table[problem->missions[j].day][period];
-                            time_table[problem->missions[j].day][period] = temp;
-                            temp = temp2;
-                            period += 1;
-                        }
-                        break;
-                    }
-                }
-
-                // Check skill match
-                if (problem->agents[i].skill != problem->missions[j].skill) {
+        // Check skill match
+        for (size_t day = 0; day < N_DAYS; day++) {
+            for (size_t j = 0; j < time_table.lengths[day]; j++) {
+                if (problem->agents[agent_index].skill != problem->missions[time_table.assignments[day][j]].skill) {
                     return false;
                 }
             }
         }
 
+        // TODO: add a distance computation in utils.c?
         // Check travel times
         float distance;
         float time;
         solution->distance_traveled = 0;
-        for (int day=1; day<6; day++) {
-            int nb_assignment_day = 0;
-            while (time_table[day][nb_assignment_day] != 0) {
-                nb_assignment_day += 1;
-            }
-            if (nb_assignment_day > 1) {
-                for (int a=0; a<nb_assignment_day-1; a++) {
-                    distance = problem->distances[time_table[day][a]][time_table[day][a+1]];
-                    solution->distance_traveled += distance;
-                    time = problem->missions[time_table[day][a+1]].start_time;
-                    time -= problem->missions[time_table[day][a]].end_time;
-                    if (!(distance / 50.0 <= time)) {
-                        return false;
-                    }
+        for (int day = 1; day < N_DAYS; day++) {
+            size_t* assignments = time_table.assignments[day];
+
+            for (int a = 0; a < time_table.lengths[day] - 1; a++) {
+                distance = problem->distances[assignments[a]][assignments[a+1]];
+
+                solution->distance_traveled += distance;
+                time = problem->missions[assignments[a+1]].start_time;
+                time -= problem->missions[assignments[a]].end_time;
+                // TODO: un-magic that number
+                if (!(distance / 50.0 <= time)) {
+                    return false;
                 }
             }
         }

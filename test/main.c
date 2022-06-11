@@ -22,9 +22,9 @@ int main() {
     RUN_TEST(test_load_agents);
     RUN_TEST(test_load_missions);
 
-    test_initial();
-
     UNITY_END();
+
+    test_initial();
 
     return 0;
 }
