@@ -18,7 +18,7 @@ int main() {
     UNITY_BEGIN();
 
     RUN_TEST(test_hello);
-    RUN_TEST(test_load_distance);
+    RUN_TEST(test_load_distances);
     RUN_TEST(test_load_agents);
     RUN_TEST(test_load_missions);
 

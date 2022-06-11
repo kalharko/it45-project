@@ -6,7 +6,7 @@
 #include "load.h"
 #include "defs.h"
 
-int load_distance(size_t n_missions, char *filename, float **data) {
+int load_distances(size_t n_missions, char *filename, float **data) {
     FILE *file;
     file = fopen(filename, "r");
     assert(file != NULL);
@@ -20,7 +20,7 @@ int load_distance(size_t n_missions, char *filename, float **data) {
 
         int j = 0;
         const char* tok;
-        for (tok = strtok(line, ","); tok && *tok && j < col; j++, tok = strtok(NULL, ","))
+        for (tok = strtok(line, ","); tok && *tok && j < n_missions; j++, tok = strtok(NULL, ","))
         {
             data[i][j] = atof(tok);
             //printf("%0.1f\t", data[i][j]);

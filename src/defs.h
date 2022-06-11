@@ -46,7 +46,7 @@ struct problem {
 
     //Recuit parameters
     double temperature;
-    double temperature_multiplicator;
+    double temperature_mult;
     double temperature_threshold;
 } typedef problem_t;
 

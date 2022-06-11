@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include "defs.h"
 
-int load_distance(size_t row, size_t col, char *filename, float **data);
+int load_distances(size_t n_missions, char *filename, float **data);
 
 int load_agents(char *filename, agent_t agents[], int nb_agent);
 

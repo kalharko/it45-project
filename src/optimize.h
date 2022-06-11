@@ -13,11 +13,11 @@ struct optimize_params {
 float score_solution(solution_t* solution, problem_t* problem);
 
 /// Random (valid) neighbor (using rejection sampling)
-solution_t random_neighbor(solution_t* solution, problem_t* problem);
+solution_t random_neighbor(solution_t* solution, problem_t problem);
 
 solution_t optimize_solution(solution_t initial_solution, problem_t* problem, optimize_params_t* params);
 
 // Check for solution validity
-bool is_solution_valid(solution_t solution, problem_t problem);
+bool is_solution_valid(solution_t* solution, problem_t problem);
 
 #endif // OPTIMIZE_H

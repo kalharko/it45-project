@@ -1,7 +1,7 @@
 #include <load.h>
 #include <string.h>
 
-void test_load_distance(void) {
+void test_load_distances(void) {
     float** data = malloc(sizeof(float*) * 45);
 
     for (size_t n = 0; n < 45; n++) {
@@ -12,7 +12,7 @@ void test_load_distance(void) {
     }
 
     TEST_ASSERT_EQUAL_INT(
-        load_distance(45, 45, "../Instances/45-4/Distances.csv", data),
+        load_distances(45, "../Instances/45-4/Distances.csv", data),
         0
     );
 
