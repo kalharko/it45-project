@@ -6,14 +6,14 @@
 #include "load.h"
 #include "defs.h"
 
-int load_distance(size_t row, size_t col, char *filename, float **data) {
+int load_distance(size_t n_missions, char *filename, float **data) {
     FILE *file;
     file = fopen(filename, "r");
     assert(file != NULL);
 
     int i = 0;
     char line[4098];
-    while (fgets(line, 4098, file) && (i < row))
+    while (fgets(line, 4098, file) && (i < n_missions))
     {
         // float row[ssParams->nreal + 1];
         char* tmp = strdup(line);

@@ -26,6 +26,8 @@ solution_t random_neighbor(solution_t* solution, problem_t* problem) {
 }
 
 solution_t optimize_solution(solution_t initial_solution, problem_t* problem, optimize_params_t* params) {
+    solution_t solution = initial_solution;
+
 
 }
 

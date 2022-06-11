@@ -43,6 +43,11 @@ struct problem {
     size_t n_missions;
 
     float **distances;
+
+    //Recuit parameters
+    double temperature;
+    double temperature_multiplicator;
+    double temperature_threshold;
 } typedef problem_t;
 
 struct solution {
