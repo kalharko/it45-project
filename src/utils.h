@@ -32,4 +32,9 @@ timetable_t build_time_table(
 **/
 float time_table_distance(const timetable_t* time_table, const problem_t* problem, size_t day);
 
+/**
+    Returns true iff `∀d, ∀i, problem->missions[time_table[d][i]].skill == problem->agents[time_table.agent].skill`
+**/
+bool has_matching_skills(const timetable_t* time_table, const problem_t* problem);
+
 #endif //LOAD_H

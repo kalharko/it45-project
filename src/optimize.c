@@ -82,13 +82,7 @@ bool is_solution_valid(solution_t* solution, const problem_t* problem) {
         timetable_t time_table = build_time_table(solution, problem, agent_index);
 
         // Check skill match
-        for (size_t day = 0; day < N_DAYS; day++) {
-            for (size_t j = 0; j < time_table.lengths[day]; j++) {
-                if (problem->agents[agent_index].skill != problem->missions[time_table.assignments[day][j]].skill) {
-                    return false;
-                }
-            }
-        }
+        if (!has_matching_skills(problem, &time_table)) return false;
 
         // TODO: add a distance computation in utils.c?
         // Check travel times

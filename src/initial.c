@@ -1,6 +1,7 @@
 #include "initial.h"
 #include <stdbool.h>
 #include <assert.h>
+#include "utils.h"
 
 solution_t new_solution(problem_t* problem) {
     assert(problem->n_missions > 0);
@@ -15,6 +16,10 @@ solution_t new_solution(problem_t* problem) {
     res.score = 0.0;
 
     return res;
+}
+
+bool is_initial_assignment_valid(const solution_t* solution, const problem_t* problem, size_t last_agent) {
+    timetable_t time_table = build_time_table(solution, problem, last_agent);
 }
 
 solution_t build_naive(problem_t* problem) {

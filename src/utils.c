@@ -64,3 +64,14 @@ timetable_t build_time_table(
 
     return res;
 }
+
+bool has_matching_skills(const timetable_t* time_table, const problem_t* problem) {
+    for (size_t day = 0; day < N_DAYS; day++) {
+        for (size_t j = 0; j < time_table.lengths[day]; j++) {
+            if (problem->agents[agent_index].skill != problem->missions[time_table.assignments[day][j]].skill) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
