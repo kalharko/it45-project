@@ -3,27 +3,12 @@
 #include <assert.h>
 #include "utils.h"
 
-solution_t new_solution(problem_t* problem) {
-    assert(problem->n_missions > 0);
-    solution_t res;
-    res.assignments = (size_t*)malloc(sizeof(size_t) * problem->n_missions);
-    res.n_assignments = problem->n_missions;
-
-    for (size_t n = 0; n < problem->n_missions; n++) {
-        res.assignments[n] = SIZE_MAX;
-    }
-
-    res.score = 0.0;
-
-    return res;
-}
-
 bool is_initial_assignment_valid(const solution_t* solution, const problem_t* problem, size_t last_agent) {
     timetable_t time_table = build_time_table(solution, problem, last_agent);
 }
 
 solution_t build_naive(problem_t* problem) {
-    solution_t solution = new_solution(problem);
+    solution_t solution = empty_solution(problem->n_missions);
     size_t* available_missions = malloc(sizeof(size_t) * problem->n_missions);
     size_t n_available_missions = problem->n_missions;
     for (size_t n = 0; n < n_available_missions; n++) {

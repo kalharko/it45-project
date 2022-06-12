@@ -5,6 +5,7 @@
 #include "load.c"
 #include "initial.c"
 #include "optimize.c"
+#include "utils.c"
 
 void setUp(void) {}
 
@@ -24,6 +25,7 @@ int main() {
 
     UNITY_END();
 
+    test_utils();
     test_initial();
 
     return 0;

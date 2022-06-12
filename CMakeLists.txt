@@ -14,7 +14,7 @@ add_executable(it45-project
     ${SRC_FILES}
 )
 
-include_directories(src/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
 target_link_libraries(it45-project PRIVATE m) # Link math library
 

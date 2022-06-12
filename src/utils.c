@@ -2,6 +2,33 @@
 #include <stdbool.h>
 #include <assert.h>
 
+solution_t empty_solution(size_t n_assignments) {
+    solution_t res;
+    res.n_assignments = n_assignments;
+
+    if (n_assignments > 0) {
+        res.assignments = (size_t*)malloc(sizeof(size_t) * n_assignments);
+
+        assert(res.assignments != NULL);
+    } else {
+        res.assignments = NULL;
+    }
+
+    for (size_t n = 0; n < n_assignments; n++) {
+        res.assignments[n] = SIZE_MAX;
+    }
+
+    res.score = 0.0;
+
+    return res;
+}
+
+void free_solution(solution_t solution) {
+    if (solution.assignments) free(solution.assignments);
+}
+
+
+
 timetable_t build_time_table(
     const solution_t* solution,
     const problem_t* problem,
@@ -35,7 +62,8 @@ timetable_t build_time_table(
             // Find the first mission in `assignments_today` that's after the current mission,
             // and insert the current mission index (i) at this spot
             for (size_t n = 0; n < res.lengths[day]; n++) {
-                if (problem->missions[assignments_today[n]].end_time <= mission->start_time) {
+                // Insert if mission[n].end_time <= mission[n+1].start_time
+                if (problem->missions[assignments_today[n]].start_time >= mission->end_time) {
                     // assignments_today[n..].rshift()
                     for (size_t o = res.lengths[day]; o > n; o--) {
                         assignments_today[o] = assignments_today[o - 1];
@@ -50,27 +78,41 @@ timetable_t build_time_table(
 
             // No mission found, append current mission
             if (!inserted) {
-                assignments_today[res.lengths[day]++] = i;
+                assignments_today[res.lengths[day]] = i;
             }
+            res.lengths[day]++;
         }
     }
 
     // Resize arrays to save on memory (remove this if we need to mutate timetable_t in hot-path code)
     for (size_t i = 0; i < N_DAYS; i++) {
-        res.assignments[i] = (size_t*)realloc(res.assignments[i], res.lengths[i] * sizeof(size_t));
+        if (res.lengths[i] > 0) {
+            res.assignments[i] = (size_t*)realloc(res.assignments[i], res.lengths[i] * sizeof(size_t));
 
-        assert(res.assignments[i] != NULL);
+            assert(res.assignments[i] != NULL);
+        } else {
+            free(res.assignments[i]);
+            res.assignments[i] = NULL;
+        }
     }
 
     return res;
 }
 
+void free_time_table(timetable_t time_table) {
+    for (size_t i = 0; i < N_DAYS; i++) {
+        if (time_table.assignments[i] != NULL) {
+            free(time_table.assignments[i]);
+        }
+    }
+}
+
 bool has_matching_skills(const timetable_t* time_table, const problem_t* problem) {
     for (size_t day = 0; day < N_DAYS; day++) {
-        for (size_t j = 0; j < time_table.lengths[day]; j++) {
-            if (problem->agents[agent_index].skill != problem->missions[time_table.assignments[day][j]].skill) {
-                return false;
-            }
+        for (size_t j = 0; j < time_table->lengths[day]; j++) {
+            skill_t agent_skill = problem->agents[time_table->agent].skill;
+            skill_t mission_skill = problem->missions[time_table->assignments[day][j]].skill;
+            if (agent_skill != mission_skill) return false;
         }
     }
     return true;

@@ -4,11 +4,13 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#define N_SKILLS 2
 enum skill {
     LSF = 0,
     LPC = 1
 } typedef skill_t;
 
+#define N_SPECIALTIES 5
 enum speciality {
     JARDINAGE,
     MECANIQUE,

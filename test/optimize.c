@@ -1,8 +1,5 @@
-#include "optimize.h"
+#include <optimize.h>
 
-
-
-void test_is_solution_valid(void)
-{
+void test_is_solution_valid(void) {
 
 }
