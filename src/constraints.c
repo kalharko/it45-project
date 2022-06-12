@@ -19,6 +19,33 @@ bool has_matching_skills(const timetable_t* time_table, const problem_t* problem
 }
 
 
+bool has_lunch_break(const timetable_t* time_table, const problem_t* problem)
+{
+    for (int day = 1; day < N_DAYS; day++)
+    {
+        size_t* assignments = time_table->assignments[day];
+        // if more than one assignments and an assignment before and after 13h
+        if (time_table->lengths[day] > 1
+            && problem->missions[assignments[0]].end_time <= 780
+            && problem->missions[assignments[time_table->lengths[day]-1]].start_time >= 780) {
+
+            // search first assignment after 13h
+            int a = 0;
+            while (problem->missions[assignments[a]].end_time < 780) {
+                a++;
+            }
+
+            if (problem->missions[assignments[a]].start_time - problem->missions[assignments[a-1]].end_time < 60) {
+                return false;
+            }
+
+        }
+    }
+
+    return true;
+}
+
+
 
 float time_table_distance(const timetable_t* time_table, const problem_t* problem, size_t day)
 {

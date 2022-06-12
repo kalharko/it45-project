@@ -53,12 +53,14 @@ int main(int argc, char **argv) {
 
 
     // // Launch optimization
+    // problem.validated_scores = maloc toussa toussa à 3 et initialisé à 0
     // optimises for each objective
     // solution_t solution = initial_solution;
     // for (int i = 0; i < 3; i++) {
     //     problem.current_objective = i;
     //     problem.temperature = temperature;
     //     solution = optimize_solution(solution_t solution, problem_t* problem)
+    //     problem.validated_scores[i] = solution.score;
     // }
 
 

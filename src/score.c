@@ -16,10 +16,17 @@ float score_solution(solution_t* solution, problem_t* problem)
         break;
 
         case 1 : // minimize the total distance traveled
+            if (score_speciality(solution, problem) < problem->validated_scores[0]) {
+                return -1;
+            }
             score = score_distance(solution, problem);
         break;
 
         case 2 : // minimize the overtime
+            if (score_speciality(solution, problem) < problem->validated_scores[0] ||
+                score_distance(solution, problem) < problem->validated_scores[1]) {
+                return -1;
+            }
             score = score_overtime(solution, problem);
         break;
 
@@ -28,6 +35,7 @@ float score_solution(solution_t* solution, problem_t* problem)
     }
 
     //printf("%d \t %f\n", problem->current_objective, score);
+    solution->score = score;
     return score;
 }
 

@@ -34,13 +34,12 @@ solution_t optimize_solution(solution_t initial_solution, problem_t* problem) {
 
     // runs until the recuit temperature is low enough
     while (problem->temperature > problem->temperature_threshold){
-        double current_score = score_solution(&current_solution, problem);
         bool solution_accepted = false;
 
         // search for a solution until it is good enough
         do {
             next_solution = random_neighbor(&current_solution, problem);
-            double delta_f = score_solution(&next_solution, problem) - current_score;
+            double delta_f = next_solution.score - current_solution.score;
 
             if (delta_f < 0) {
                 solution_accepted = true;
@@ -67,8 +66,10 @@ bool is_solution_valid(solution_t* solution, const problem_t* problem) {
         // Check skill match
         if (!has_matching_skills(&time_table, problem)) return false;
 
-        // TODO: add a distance computation in utils.c?
-        // Check travel times
+        // Check lunch break
+        if (!has_lunch_break(&time_table, problem)) return false;
+
+        // Check travel times and gather total distance traveled
         float distance;
         float time;
         for (int day = 1; day < N_DAYS; day++) {
@@ -80,6 +81,12 @@ bool is_solution_valid(solution_t* solution, const problem_t* problem) {
                 solution->distance_traveled += distance;
             }
         }
+    }
+
+    // Check the cascade objective validity
+    solution->score = score_solution(solution, problem);
+    if (solution->score == -1) {
+        return false;
     }
 
     return true;
