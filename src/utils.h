@@ -40,16 +40,6 @@ timetable_t build_time_table(
 /// Frees the memory allocated for a `timetable_t` instance
 void free_time_table(timetable_t time_table);
 
-// TODO :3
-/**
-    Computes the distance travelled for a given day.
-    Returns 0 if `day >= N_DAYS` or if there are no assignments that day.
-**/
-float time_table_distance(const timetable_t* time_table, const problem_t* problem, size_t day);
 
-/**
-    Returns true iff `∀d, ∀i, problem->missions[time_table[d][i]].skill == problem->agents[time_table.agent].skill`
-**/
-bool has_matching_skills(const timetable_t* time_table, const problem_t* problem);
 
 #endif // UTILS_H

@@ -7,6 +7,8 @@ set(SRC_FILES
     src/initial.c
     src/optimize.c
     src/utils.c
+    src/score.c
+    src/constraints.c
 )
 
 add_executable(it45-project

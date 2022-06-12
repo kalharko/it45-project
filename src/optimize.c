@@ -3,27 +3,9 @@
 
 #include "optimize.h"
 #include "utils.h"
+#include "score.h"
+#include "constraints.h"
 
-float score_solution(solution_t* solution, problem_t* problem) {
-    float score = 0;
-
-    switch (problem->current_objective)
-    {
-        case 0 :
-        break;
-
-        case 1 :
-        break;
-
-        case 2 :
-        break;
-
-        default :
-        break;
-    }
-
-    return score;
-}
 
 solution_t random_neighbor(solution_t* solution, problem_t* problem) {
     int neighbor_agent = rand() % problem->n_agents;
@@ -78,6 +60,7 @@ solution_t optimize_solution(solution_t initial_solution, problem_t* problem) {
 // TODO: split into multiple functions for each condition
 bool is_solution_valid(solution_t* solution, const problem_t* problem) {
     // Check that each agent can go to each of his assignments
+    solution->distance_traveled = 0;
     for (int agent_index = 0; agent_index < problem->n_agents; agent_index++) {
         timetable_t time_table = build_time_table(solution, problem, agent_index);
 
@@ -88,23 +71,15 @@ bool is_solution_valid(solution_t* solution, const problem_t* problem) {
         // Check travel times
         float distance;
         float time;
-        solution->distance_traveled = 0;
         for (int day = 1; day < N_DAYS; day++) {
-            size_t* assignments = time_table.assignments[day];
-
-            for (int a = 0; a < time_table.lengths[day] - 1; a++) {
-                distance = problem->distances[assignments[a]][assignments[a+1]];
-
+            distance = time_table_distance(&time_table, problem, day);
+            if (distance = -1) {
+                return false;
+            }
+            else {
                 solution->distance_traveled += distance;
-                time = problem->missions[assignments[a+1]].start_time;
-                time -= problem->missions[assignments[a]].end_time;
-                // TODO: un-magic that number
-                if (!(distance / 50.0 <= time)) {
-                    return false;
-                }
             }
         }
-
     }
 
     return true;

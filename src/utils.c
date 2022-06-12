@@ -106,14 +106,3 @@ void free_time_table(timetable_t time_table) {
         }
     }
 }
-
-bool has_matching_skills(const timetable_t* time_table, const problem_t* problem) {
-    for (size_t day = 0; day < N_DAYS; day++) {
-        for (size_t j = 0; j < time_table->lengths[day]; j++) {
-            skill_t agent_skill = problem->agents[time_table->agent].skill;
-            skill_t mission_skill = problem->missions[time_table->assignments[day][j]].skill;
-            if (agent_skill != mission_skill) return false;
-        }
-    }
-    return true;
-}
