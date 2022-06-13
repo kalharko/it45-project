@@ -28,7 +28,7 @@ struct timetable {
     The returned time table is guaranteed to have the following properties:
     - `∀d, ∀i, i < lengths[d] <=> problem->missions[d][i] is defined`
     - `∀d, ∀i, problem->missions[assignments[d][i]].day == d`
-    - `∀d, ∀i>0, problem->missions[assignments[d][i-1]].end_time <= problem->missions[assignments[d][i]].start_time`
+    - `∀d, ∀i>0, problem->missions[assignments[d][i-1]].start_time <= problem->missions[assignments[d][i]].start_time`
     - `return.agent == agent`
 **/
 timetable_t build_time_table(

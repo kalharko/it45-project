@@ -44,7 +44,10 @@ struct problem {
     mission_t* missions;
     size_t n_missions;
 
-    float **distances;
+    // Distances between two missions, distances[i][j] is the distance to get from missions `i` to mission `j`
+    float** distances;
+    // Distances between the missions and the sessad center
+    float* sessad_distances;
 
     //Recuit parameters
     double temperature;

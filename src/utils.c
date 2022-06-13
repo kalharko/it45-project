@@ -62,8 +62,8 @@ timetable_t build_time_table(
             // Find the first mission in `assignments_today` that's after the current mission,
             // and insert the current mission index (i) at this spot
             for (size_t n = 0; n < res.lengths[day]; n++) {
-                // Insert if mission[n].end_time <= mission[n+1].start_time
-                if (problem->missions[assignments_today[n]].start_time >= mission->end_time) {
+                // Insert if mission[n].start_time <= mission[n+1].start_time
+                if (mission->start_time <= problem->missions[assignments_today[n]].start_time) {
                     // assignments_today[n..].rshift()
                     for (size_t o = res.lengths[day]; o > n; o--) {
                         assignments_today[o] = assignments_today[o - 1];

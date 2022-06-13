@@ -24,10 +24,8 @@ float time_table_extra_hours(const int agent, const timetable_t* time_table, con
 /**
     Computes the distance traveled for a given day.
     Returns 0 if `day >= N_DAYS` or if there are no assignments that day.
-    Returns 1 if there is not enough time between assignments for the travel time
+    Returns -1 if there is not enough time between assignments for the travel time
 **/
 float time_table_distance(const timetable_t* time_table, const problem_t* problem, size_t day);
-
-
 
 #endif // CONSTRAINTS_H

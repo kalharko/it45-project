@@ -85,7 +85,7 @@ void test_build_time_table_random(void) {
             skill_t skill = rand() % N_SKILLS;
             problem_push_agent(&problem, n, skill, rand() % N_SPECIALTIES, 20 + rand() % 16);
 
-            n_missions[n] = 1 + rand() % 32;
+            n_missions[n] = 2 + (rand() % 64);
             sum_missions += n_missions[n];
             for (size_t o = 0; o < n_missions[n]; o++) {
                 int start = rand() % (8 * 60) + 8 * 60;
@@ -120,14 +120,14 @@ void test_build_time_table_random(void) {
             TEST_ASSERT_EQUAL(n, time_table.agent);
 
             // ∀d, ∀i, i < lengths[d] <=> problem->missions[d][i] is defined
-            for (size_t day; day < N_DAYS; day++) {
+            for (size_t day = 0; day < N_DAYS; day++) {
                 for (size_t i = 0; i < time_table.lengths[day]; i++) {
-                    TEST_ASSERT_LESS_THAN_UINT64(time_table.assignments[day][i], sum_missions);
+                    TEST_ASSERT_LESS_THAN_UINT64(sum_missions, time_table.assignments[day][i]);
                 }
             }
 
             // ∀d, ∀i, problem->missions[assignments[d][i]].day == d
-            for (size_t day; day < N_DAYS; day++) {
+            for (size_t day = 0; day < N_DAYS; day++) {
                 for (size_t i = 0; i < time_table.lengths[day]; i++) {
                     TEST_ASSERT_EQUAL_UINT64(
                         day,
@@ -137,11 +137,11 @@ void test_build_time_table_random(void) {
             }
 
             // ∀d, ∀i>0, problem->missions[assignments[d][i]].end_time > problem->missions[assignments[d][i-1]].start_time
-            for (size_t day; day < N_DAYS; day++) {
+            for (size_t day = 0; day < N_DAYS; day++) {
                 for (size_t i = 0; i + 1 < time_table.lengths[day]; i++) {
                     TEST_ASSERT_LESS_OR_EQUAL_UINT64(
-                        problem.missions[time_table.assignments[day][i]].end_time,
-                        problem.missions[time_table.assignments[day][i+1]].start_time
+                        problem.missions[time_table.assignments[day][i+1]].start_time,
+                        problem.missions[time_table.assignments[day][i]].start_time
                     );
                 }
             }

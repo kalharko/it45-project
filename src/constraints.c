@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "constraints.h"
 #include "utils.h"
@@ -51,7 +52,7 @@ float time_table_extra_hours(const int agent, const timetable_t* time_table, con
     float extra_work_time = 0;
     float day_work_time;
     float distance;
-    float speed = 833.333; //833.333 m/min = 50km/h
+    float speed = 50.0 * 1000.0 / 60.0; // 833.333 m/min = 50km/h
 
     for (int day = 1; day < N_DAYS; day++)
     {
@@ -75,10 +76,10 @@ float time_table_extra_hours(const int agent, const timetable_t* time_table, con
         day_work_time += distance / speed;
 
         // check day work time
-        if (day_work_time > 600) { // > 10h
+        if (day_work_time > 10 * 60) { // > 10h
             return -1;
         }
-        else if (day_work_time >480) { // >8h
+        else if (day_work_time > 8 * 60) { // >8h
             extra_work_time += day_work_time - 480;
         }
 
@@ -86,7 +87,7 @@ float time_table_extra_hours(const int agent, const timetable_t* time_table, con
     }
 
     // check week work time against the maximum legal work time
-    if (total_work_time > 2880) { // >48h
+    if (total_work_time > 48 * 60) { // >48h
         return -1;
     }
 
@@ -95,12 +96,13 @@ float time_table_extra_hours(const int agent, const timetable_t* time_table, con
 
 
 
-float time_table_distance(const timetable_t* time_table, const problem_t* problem, size_t day)
-{
+float time_table_distance(const timetable_t* time_table, const problem_t* problem, size_t day) {
     float total_distance = 0;
     float distance;
     float time;
     float speed = 833.333; //833.333 m/min = 50km/h
+
+    assert(day < N_DAYS);
     size_t* assignments = time_table->assignments[day];
 
     if (time_table->lengths[day] == 0) { //no assignments that day
@@ -108,7 +110,10 @@ float time_table_distance(const timetable_t* time_table, const problem_t* proble
     }
 
     // travel distance between the SESSAD and first mission
-    total_distance = problem->distances[0][assignments[0]];
+    assert(assignments[0] < problem->n_missions);
+    assert(problem->distances != NULL);
+    assert(problem->sessad_distances != NULL);
+    total_distance = problem->sessad_distances[assignments[0]];
 
     for (int a = 0; a < time_table->lengths[day] - 1; a++) {
         distance = problem->distances[assignments[a]][assignments[a+1]];
@@ -123,7 +128,7 @@ float time_table_distance(const timetable_t* time_table, const problem_t* proble
     }
 
     // travel distance between the last mission and SESSAD
-    total_distance += problem->distances[assignments[time_table->lengths[day]-1]][0];
+    total_distance += problem->sessad_distances[assignments[time_table->lengths[day]-1]];
 
     return total_distance;
 }

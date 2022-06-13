@@ -6,7 +6,9 @@ problem_t empty_problem() {
         .agents = NULL,
         .n_agents = 0,
         .missions = NULL,
-        .n_missions = 0
+        .n_missions = 0,
+        .distances = NULL,
+        .sessad_distances = NULL
     };
     return res;
 }
@@ -14,6 +16,9 @@ problem_t empty_problem() {
 void free_problem(problem_t problem) {
     free(problem.agents);
     free(problem.missions);
+
+    if (problem.distances != NULL) free(problem.distances);
+    if (problem.sessad_distances != NULL) free(problem.sessad_distances);
 }
 
 void problem_push_mission(
@@ -63,4 +68,67 @@ void problem_push_agent(
     };
 
     problem->agents[problem->n_agents - 1] = agent;
+}
+
+void problem_set_distances(problem_t* problem, float* distances) {
+    TEST_ASSERT_NOT_NULL(problem);
+
+    problem->distances = malloc(sizeof(float*) * problem->n_missions);
+    TEST_ASSERT_NOT_NULL(problem->distances);
+
+    for (size_t y = 0; y < problem->n_missions; y++) {
+        problem->distances[y] = malloc(sizeof(float) * problem->n_missions);
+        TEST_ASSERT_NOT_NULL(problem->distances[y]);
+
+        for (size_t x = 0; x < problem->n_missions; x++) {
+            problem->distances[y][x] = distances[(y + 1) * (problem->n_missions + 1) + x + 1];
+
+            if (x == y) {
+                TEST_ASSERT_EQUAL_FLOAT(0.0, problem->distances[y][x]);
+            }
+        }
+    }
+
+    problem->sessad_distances = malloc(sizeof(float) * problem->n_missions);
+    TEST_ASSERT_NOT_NULL(problem->sessad_distances);
+
+    for (size_t x = 0; x < problem->n_missions; x++) {
+        problem->sessad_distances[x] = distances[x + 1];
+    }
+}
+
+void problem_set_dummy_distances(problem_t* problem, float dist_missions, float dist_sessad) {
+    TEST_ASSERT_NOT_NULL(problem);
+
+    problem->distances = malloc(sizeof(float*) * problem->n_missions);
+    TEST_ASSERT_NOT_NULL(problem->distances);
+
+    for (size_t y = 0; y < problem->n_missions; y++) {
+        problem->distances[y] = malloc(sizeof(float) * problem->n_missions);
+        TEST_ASSERT_NOT_NULL(problem->distances[y]);
+
+        for (size_t x = 0; x < problem->n_missions; x++) {
+            if (x != y) {
+                problem->distances[y][x] = dist_missions;
+            } else {
+                problem->distances[y][x] = 0.0;
+            }
+        }
+    }
+
+    problem->sessad_distances = malloc(sizeof(float) * problem->n_missions);
+    TEST_ASSERT_NOT_NULL(problem->sessad_distances);
+
+    for (size_t x = 0; x < problem->n_missions; x++) {
+        problem->sessad_distances[x] = dist_sessad;
+    }
+}
+
+void problem_shuffle_missions(problem_t* problem) {
+    for (size_t n = 0; n < problem->n_missions - 1; n++) {
+        size_t o = n + rand() % (problem->n_missions - 1 - n) + 1;
+        mission_t tmp = problem->missions[n];
+        problem->missions[n] = problem->missions[o];
+        problem->missions[o] = tmp;
+    }
 }
