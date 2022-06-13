@@ -217,6 +217,25 @@ void test_drop_population(void) {
     }
 }
 
+void test_sort_individuals(void) {
+    for (size_t round = 0; round < 100; round++) {
+        size_t length = 50 + rand() % 250;
+        solution_t* population = (solution_t*)malloc(sizeof(solution_t) * length);
+
+        for (size_t n = 0; n < length; n++) {
+            population[n] = empty_solution(1);
+            population[n].assignments[0] = n;
+            population[n].score = (float)rand() / (float)SIZE_MAX * 16.0;
+        }
+
+        sort_individuals(population, length);
+
+        for (size_t n = 0; n + 1 < length; n++) {
+            TEST_ASSERT_TRUE(population[n + 1].score >= population[n].score);
+        }
+    }
+}
+
 void test_initial_score(void) {
     problem_t problem = empty_problem();
 
@@ -287,6 +306,7 @@ void test_initial() {
     RUN_TEST(test_build_naive_phase2);
 
     RUN_TEST(test_drop_population);
+    RUN_TEST(test_sort_individuals);
 
     RUN_TEST(test_initial_score);
 
