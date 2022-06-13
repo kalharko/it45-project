@@ -74,7 +74,7 @@ bool is_solution_valid(solution_t* solution, const problem_t* problem) {
         float time;
         for (int day = 1; day < N_DAYS; day++) {
             distance = time_table_distance(&time_table, problem, day);
-            if (distance = -1) {
+            if (distance == -1) {
                 return false;
             }
             else {
@@ -84,7 +84,7 @@ bool is_solution_valid(solution_t* solution, const problem_t* problem) {
     }
 
     // Check the cascade objective validity
-    solution->score = score_solution(solution, problem);
+    score_solution(solution, problem);
     if (solution->score == -1) {
         return false;
     }

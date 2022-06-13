@@ -1,4 +1,5 @@
 #include <utils.h>
+#include <constraints.h>
 
 void test_build_time_table(void) {
     problem_t problem = empty_problem();

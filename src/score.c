@@ -5,8 +5,7 @@
 #include "score.h"
 
 
-float score_solution(solution_t* solution, problem_t* problem)
-{
+float score_solution(solution_t* solution, const problem_t* problem) {
     float score = 0;
 
     switch (problem->current_objective)
@@ -35,13 +34,13 @@ float score_solution(solution_t* solution, problem_t* problem)
     }
 
     //printf("%d \t %f\n", problem->current_objective, score);
-    solution->score = score;
+    // solution->score = score;
     return score;
 }
 
 
 // returns the number of assignments where the agent and mission specialty do not match
-float score_speciality(solution_t* solution, problem_t* problem)
+float score_speciality(solution_t* solution, const problem_t* problem)
 {
     float score = 0;
 
@@ -58,7 +57,7 @@ float score_speciality(solution_t* solution, problem_t* problem)
 
 
 // returns the total distance traveled by the agents
-float score_distance(solution_t* solution, problem_t* problem)
+float score_distance(solution_t* solution, const problem_t* problem)
 {
     // should be already calculated by the is_solution_valid() function
     if (solution->distance_traveled != 0) {
@@ -69,7 +68,7 @@ float score_distance(solution_t* solution, problem_t* problem)
 }
 
 
-float score_overtime(solution_t* solution, problem_t* problem)
+float score_overtime(solution_t* solution, const problem_t* problem)
 {
     return 0;
 }
