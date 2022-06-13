@@ -15,9 +15,18 @@ struct initial_params {
     float survival_rate; // [0.0-1.0]
     float reproduction_rate; // [0.0-1.0], proportion of the population that gets to reproduce
     float mutation_rate; // [0.0-1.0], the probability for an individual to mutate
+
+    float unassigned_penalty; // how many minutes an unassigned mission is worth
 } typedef initial_params_t;
 
 solution_t build_naive(const problem_t* problem);
+
+/// Returns the score of a given solution for the initial phase, +∞ if it is an invalid initial solution
+float initial_score(
+    const solution_t* solution,
+    const problem_t* problem,
+    initial_params_t initial_params
+);
 
 /// Sorts the array individuals by the `score` key
 void sort_individuals(solution_t* individuals, size_t length);

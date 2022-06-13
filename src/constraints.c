@@ -47,6 +47,8 @@ bool has_lunch_break(const timetable_t* time_table, const problem_t* problem)
 }
 
 float calc_day_work_time(const timetable_t* time_table, const problem_t* problem, size_t day) {
+    if (time_table->lengths[day] == 0) return 0.0;
+
     // TODO: make constant for speed
     float speed = 50.0 * 1000.0 / 60.0; // 833.333 m/min = 50km/h
 
@@ -55,14 +57,16 @@ float calc_day_work_time(const timetable_t* time_table, const problem_t* problem
     // travel distance between SESSAD and first mission
     float distance = problem->distances[0][assignments[0]];
 
-    // distances between missions and time of missions
-    for (int a = 0; a < time_table->lengths[day] - 2; a++) {
-        res += problem->missions[assignments[a]].end_time;
-        res -= problem->missions[assignments[a]].start_time;
+    // distances between missions
+    for (size_t a = 0; a + 1 < time_table->lengths[day]; a++) {
         distance += problem->distances[assignments[a]][assignments[a+1]];
     }
-    res += problem->missions[assignments[time_table->lengths[day]-1]].end_time;
-    res -= problem->missions[assignments[time_table->lengths[day]-1]].start_time;
+
+    // time of missions
+    for (size_t a = 0; a < time_table->lengths[day]; a++) {
+        res += problem->missions[assignments[a]].end_time;
+        res -= problem->missions[assignments[a]].start_time;
+    }
 
     // travel distance between the last mission and SESSAD
     distance += problem->distances[assignments[time_table->lengths[day]-1]][0];

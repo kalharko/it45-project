@@ -217,10 +217,78 @@ void test_drop_population(void) {
     }
 }
 
+void test_initial_score(void) {
+    problem_t problem = empty_problem();
+
+    problem_push_agent(&problem,
+        0,
+        LSF,
+        MECANIQUE,
+        32
+    );
+    problem_push_agent(&problem,
+        1,
+        LSF,
+        JARDINAGE,
+        32
+    );
+
+    problem_push_mission(&problem,
+        0,
+        LSF,
+        MECANIQUE,
+        0,
+        8*60,
+        12*60
+    );
+
+    problem_push_mission(&problem,
+        1,
+        LSF,
+        MECANIQUE,
+        0,
+        14*60,
+        18*60
+    );
+
+    problem_push_mission(&problem,
+        2,
+        LSF,
+        MECANIQUE,
+        0,
+        19*60,
+        23*60
+    );
+
+    problem_set_dummy_distances(&problem, 0.0, 0.0);
+
+    solution_t solution = empty_solution(3);
+
+    initial_params_t initial_params = {
+        .unassigned_penalty = 30.0
+    };
+
+    TEST_ASSERT_FLOAT_WITHIN(0.1, 90.0, initial_score(&solution, &problem, initial_params));
+
+    solution.assignments[0] = 0;
+    TEST_ASSERT_FLOAT_WITHIN(0.1, 60.0, initial_score(&solution, &problem, initial_params));
+
+    solution.assignments[1] = 0;
+    TEST_ASSERT_FLOAT_WITHIN(0.1, 30.0, initial_score(&solution, &problem, initial_params));
+
+    solution.assignments[2] = 0;
+    TEST_ASSERT_FLOAT_WITHIN(0.1, 120.0, initial_score(&solution, &problem, initial_params));
+}
+
 void test_initial() {
     UNITY_BEGIN();
+
     RUN_TEST(test_build_naive);
     RUN_TEST(test_build_naive_phase2);
+
     RUN_TEST(test_drop_population);
+
+    RUN_TEST(test_initial_score);
+
     UNITY_END();
 }

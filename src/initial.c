@@ -8,42 +8,35 @@
 #include "constraints.h"
 #include "optimize.h"
 
-bool is_initial_assignment_valid(const solution_t* solution, const problem_t* problem, size_t last_agent) {
-    timetable_t time_table = build_time_table(solution, problem, last_agent);
-    //@zig `defer free_time_table(time_table);`
-
+bool is_initial_assignment_valid_sub(const timetable_t* time_table, const problem_t* problem) {
     // Check that the mission skills match
-    if (!has_matching_skills(&time_table, problem)) {
-        free_time_table(time_table);
+    if (!has_matching_skills(time_table, problem)) {
         return false;
     }
 
     // Check that no missions overlap
     for (size_t day = 0; day < N_DAYS; day++) {
-        if (time_table_distance(&time_table, problem, day) < 0.0) {
-            free_time_table(time_table);
+        if (time_table_distance(time_table, problem, day) < 0.0) {
             return false;
         }
     }
 
     // Check that there is a lunch break
-    if (!has_lunch_break(&time_table, problem)) {
-        free_time_table(time_table);
+    if (!has_lunch_break(time_table, problem)) {
         return false;
     }
 
-    free_time_table(time_table);
     return true;
 }
 
-// TODO: store a "dirty" flag for each agent and only check those
-bool is_initial_solution_valid(const solution_t* solution, const problem_t* problem) {
-    for (size_t agent = 0; agent < problem->n_agents; agent++) {
-        if (!is_initial_assignment_valid(solution, problem, agent)) {
-            return false;
-        }
-    }
-    return true;
+bool is_initial_assignment_valid(const solution_t* solution, const problem_t* problem, size_t last_agent) {
+    timetable_t time_table = build_time_table(solution, problem, last_agent);
+    //@zig `defer free_time_table(time_table);`
+
+    bool res = is_initial_assignment_valid_sub(&time_table, problem);
+
+    free_time_table(time_table);
+    return res;
 }
 
 size_t build_naive_phase(
@@ -153,18 +146,22 @@ solution_t drop_population(solution_t* population, size_t n_individuals, size_t 
     return res;
 }
 
+// TODO: store a "dirty" flag for each agent for memoization
 float initial_score(
-    const solution_t* individual,
-    const problem_t* problem
+    const solution_t* solution,
+    const problem_t* problem,
+    initial_params_t initial_params
 ) {
     float score = 0.0;
 
-    if (!is_initial_solution_valid(individual, problem)) {
-        return INFINITY;
-    }
-
     for (size_t agent = 0; agent < problem->n_agents; agent++) {
-        timetable_t time_table = build_time_table(individual, problem, 0);
+        timetable_t time_table = build_time_table(solution, problem, agent);
+
+        if (!is_initial_assignment_valid_sub(&time_table, problem)) {
+            free_time_table(time_table);
+            return INFINITY;
+        }
+
         float total_work_time = 0;
         float extra_work_time = 0;
 
@@ -193,6 +190,12 @@ float initial_score(
         }
 
         free_time_table(time_table);
+    }
+
+    for (size_t n = 0; n < solution->n_assignments; n++) {
+        if (solution->assignments[n] == SIZE_MAX) {
+            score += initial_params.unassigned_penalty;
+        }
     }
 
     return score;
@@ -249,7 +252,7 @@ solution_t initial_genetical_simulation(
     for (uint64_t round = 0; round < initial_params.rounds; round++) {
         // Score all individuals
         for (size_t n = 0; n < initial_params.population; n++) {
-            population[n].score = initial_score(&population[n], problem);
+            population[n].score = initial_score(&population[n], problem, initial_params);
         }
 
         // Sort individuals by their score
