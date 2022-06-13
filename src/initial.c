@@ -32,15 +32,13 @@ bool is_initial_assignment_valid(const solution_t* solution, const problem_t* pr
     return true;
 }
 
-solution_t build_naive(problem_t* problem) {
-    solution_t solution = empty_solution(problem->n_missions);
-    size_t* available_missions = malloc(sizeof(size_t) * problem->n_missions);
-    size_t n_available_missions = problem->n_missions;
-    for (size_t n = 0; n < n_available_missions; n++) {
-        available_missions[n] = n;
-    }
-
-    assert(problem->n_agents > 0);
+size_t build_naive_phase(
+    size_t* available_missions,
+    size_t n_available_missions,
+    solution_t* solution,
+    const problem_t* problem,
+    bool speciality_should_match
+) {
     size_t agent_index = 0;
     size_t misses = 0;
     while (n_available_missions) {
@@ -52,10 +50,17 @@ solution_t build_naive(problem_t* problem) {
         size_t index2 = index;
         do {
             mission_t* mission = &problem->missions[available_missions[index2]];
-            if (mission->skill == agent->skill && mission->speciality == agent->speciality) {
-                solution.assignments[available_missions[index2]] = agent_index;
 
-                if (is_initial_assignment_valid(&solution, problem, agent_index)) {
+            // Check whether the skills/specialities match
+            if (
+                mission->skill == agent->skill
+                && (!speciality_should_match || mission->speciality == agent->speciality)
+            ) {
+                solution->assignments[available_missions[index2]] = agent_index;
+
+                if (is_initial_assignment_valid(solution, problem, agent_index)) {
+                    // assignment is considered valid; keep it and remove it from the available missions pool
+
                     // available_missions.remove(index2)
                     for (size_t i = index2 + 1; i < n_available_missions; i++) {
                         available_missions[i - 1] = available_missions[i];
@@ -65,8 +70,8 @@ solution_t build_naive(problem_t* problem) {
                     has_assigned = true;
                     break;
                 } else {
-                    // Backtrack
-                    solution.assignments[available_missions[index2]] = SIZE_MAX;
+                    // assignment isn't valid; remove it and leave it in the available missions pool
+                    solution->assignments[available_missions[index2]] = SIZE_MAX;
                 }
             }
             index2 = (index2 + 1) % n_available_missions;
@@ -84,15 +89,41 @@ solution_t build_naive(problem_t* problem) {
         agent_index = (agent_index + 1) % problem->n_agents;
     }
 
-    misses = 0;
+    return n_available_missions;
+}
 
-    // TODO: step 2
+solution_t build_naive(const problem_t* problem) {
+    solution_t solution = empty_solution(problem->n_missions);
+    size_t* available_missions = malloc(sizeof(size_t) * problem->n_missions);
+    size_t n_available_missions = problem->n_missions;
+    for (size_t n = 0; n < n_available_missions; n++) {
+        available_missions[n] = n;
+    }
+
+    assert(problem->n_agents > 0);
+    n_available_missions = build_naive_phase(
+        available_missions,
+        n_available_missions,
+        &solution,
+        problem,
+        true
+    );
+
+    if (n_available_missions > 0) {
+        n_available_missions = build_naive_phase(
+            available_missions,
+            n_available_missions,
+            &solution,
+            problem,
+            false
+        );
+    }
 
     free(available_missions);
 
     return solution;
 }
 
-solution_t build_initial_solution(problem_t* problem, const initial_params_t* initial_params) {
+solution_t build_initial_solution(const problem_t* problem, const initial_params_t* initial_params) {
     return build_naive(problem);
 }

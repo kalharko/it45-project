@@ -174,14 +174,23 @@ void test_build_naive_phase2(void) {
     TEST_ASSERT_TRUE(is_mission_assigned(&solution, &problem, 0, 0, true));
     TEST_ASSERT_TRUE(is_mission_assigned(&solution, &problem, 1, 1, true));
     // TODO: phase 2
-    // TEST_ASSERT_TRUE(
-    //     is_mission_assigned(&solution, &problem, 0, 2, false)
-    //     || is_mission_assigned(&solution, &problem, 0, 4, false)
-    // );
-    // TEST_ASSERT_TRUE(
-    //     is_mission_assigned(&solution, &problem, 1, 3, false)
-    //     || is_mission_assigned(&solution, &problem, 1, 5, false)
-    // );
+    TEST_ASSERT_TRUE(
+        is_mission_assigned(&solution, &problem, 0, 2, false)
+        || is_mission_assigned(&solution, &problem, 0, 4, false)
+    );
+    TEST_ASSERT_TRUE(
+        is_mission_assigned(&solution, &problem, 1, 3, false)
+        || is_mission_assigned(&solution, &problem, 1, 5, false)
+    );
+
+    TEST_ASSERT_FALSE(
+        is_mission_assigned(&solution, &problem, 0, 2, false)
+        && is_mission_assigned(&solution, &problem, 0, 4, false)
+    );
+    TEST_ASSERT_FALSE(
+        is_mission_assigned(&solution, &problem, 1, 3, false)
+        && is_mission_assigned(&solution, &problem, 1, 5, false)
+    );
 
     free_solution(solution);
     free_problem(problem);
