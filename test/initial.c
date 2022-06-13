@@ -100,100 +100,104 @@ void test_build_naive(void) {
 
 
 void test_build_naive_phase2(void) {
-    problem_t problem = empty_problem();
+    for (size_t round = 0; round < 100; round++) {
+        problem_t problem = empty_problem();
 
-    problem_push_agent(&problem,
-        0,
-        LSF,
-        MECANIQUE,
-        35
-    );
-    problem_push_agent(&problem,
-        1,
-        LPC,
-        JARDINAGE,
-        35
-    );
+        problem_push_agent(&problem,
+            0,
+            LSF,
+            MECANIQUE,
+            35
+        );
+        problem_push_agent(&problem,
+            1,
+            LPC,
+            JARDINAGE,
+            35
+        );
 
-    problem_push_mission(&problem,
-        0,
-        LSF,
-        MECANIQUE,
-        0,
-        8*60,
-        9*60
-    );
-    problem_push_mission(&problem,
-        1,
-        LPC,
-        JARDINAGE,
-        0,
-        10*60,
-        11*60
-    );
+        problem_push_mission(&problem,
+            0,
+            LSF,
+            MECANIQUE,
+            0,
+            8*60,
+            9*60
+        );
+        problem_push_mission(&problem,
+            1,
+            LPC,
+            JARDINAGE,
+            0,
+            10*60,
+            11*60
+        );
 
-    // Only two of these missions should be assigned
-    problem_push_mission(&problem,
-        2,
-        LSF,
-        MENUISERIE,
-        0,
-        9*60 + 30,
-        10*60 + 30
-    );
-    problem_push_mission(&problem,
-        3,
-        LPC,
-        ELECTRICITE,
-        0,
-        11*60 + 30,
-        12*60 + 30
-    );
-    problem_push_mission(&problem,
-        4,
-        LSF,
-        MUSIQUE,
-        0,
-        9*60 + 30,
-        10*60 + 30
-    );
-    problem_push_mission(&problem,
-        5,
-        LPC,
-        MECANIQUE,
-        0,
-        11*60 + 30,
-        12*60 + 30
-    );
+        // Only two of these missions should be assigned
+        problem_push_mission(&problem,
+            2,
+            LSF,
+            MENUISERIE,
+            0,
+            9*60 + 30,
+            10*60 + 30
+        );
+        problem_push_mission(&problem,
+            3,
+            LPC,
+            ELECTRICITE,
+            0,
+            11*60 + 30,
+            12*60 + 30
+        );
+        problem_push_mission(&problem,
+            4,
+            LSF,
+            MUSIQUE,
+            0,
+            9*60 + 30,
+            10*60 + 30
+        );
+        problem_push_mission(&problem,
+            5,
+            LPC,
+            MECANIQUE,
+            0,
+            11*60 + 30,
+            12*60 + 30
+        );
 
-    problem_shuffle_missions(&problem);
-    problem_set_dummy_distances(&problem, 10.0, 15.0);
+        problem_shuffle_missions(&problem);
+        problem_set_dummy_distances(&problem, 10.0, 15.0);
 
-    solution_t solution = build_naive(&problem);
+        solution_t solution = build_naive(&problem);
 
-    TEST_ASSERT_TRUE(is_mission_assigned(&solution, &problem, 0, 0, true));
-    TEST_ASSERT_TRUE(is_mission_assigned(&solution, &problem, 1, 1, true));
-    // TODO: phase 2
-    TEST_ASSERT_TRUE(
-        is_mission_assigned(&solution, &problem, 0, 2, false)
-        || is_mission_assigned(&solution, &problem, 0, 4, false)
-    );
-    TEST_ASSERT_TRUE(
-        is_mission_assigned(&solution, &problem, 1, 3, false)
-        || is_mission_assigned(&solution, &problem, 1, 5, false)
-    );
+        TEST_ASSERT_TRUE(is_mission_assigned(&solution, &problem, 0, 0, true));
+        TEST_ASSERT_TRUE(is_mission_assigned(&solution, &problem, 1, 1, true));
 
-    TEST_ASSERT_FALSE(
-        is_mission_assigned(&solution, &problem, 0, 2, false)
-        && is_mission_assigned(&solution, &problem, 0, 4, false)
-    );
-    TEST_ASSERT_FALSE(
-        is_mission_assigned(&solution, &problem, 1, 3, false)
-        && is_mission_assigned(&solution, &problem, 1, 5, false)
-    );
+        // One of the two remaining missions for each agent should be assigned
+        TEST_ASSERT_TRUE(
+            is_mission_assigned(&solution, &problem, 0, 2, false)
+            || is_mission_assigned(&solution, &problem, 0, 4, false)
+        );
+        TEST_ASSERT_TRUE(
+            is_mission_assigned(&solution, &problem, 1, 3, false)
+            || is_mission_assigned(&solution, &problem, 1, 5, false)
+        );
 
-    free_solution(solution);
-    free_problem(problem);
+        // But not both, as they overlap!
+        TEST_ASSERT_FALSE(
+            is_mission_assigned(&solution, &problem, 0, 2, false)
+            && is_mission_assigned(&solution, &problem, 0, 4, false)
+        );
+        TEST_ASSERT_FALSE(
+            is_mission_assigned(&solution, &problem, 1, 3, false)
+            && is_mission_assigned(&solution, &problem, 1, 5, false)
+        );
+
+        free_solution(solution);
+        free_problem(problem);
+    }
 }
 
 void test_initial() {
