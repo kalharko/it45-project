@@ -1,8 +1,12 @@
 #include "initial.h"
 #include <stdbool.h>
 #include <assert.h>
+#include <math.h>
+#include <stdio.h>
+
 #include "utils.h"
 #include "constraints.h"
+#include "optimize.h"
 
 bool is_initial_assignment_valid(const solution_t* solution, const problem_t* problem, size_t last_agent) {
     timetable_t time_table = build_time_table(solution, problem, last_agent);
@@ -29,6 +33,16 @@ bool is_initial_assignment_valid(const solution_t* solution, const problem_t* pr
     }
 
     free_time_table(time_table);
+    return true;
+}
+
+// TODO: store a "dirty" flag for each agent and only check those
+bool is_initial_solution_valid(const solution_t* solution, const problem_t* problem) {
+    for (size_t agent = 0; agent < problem->n_agents; agent++) {
+        if (!is_initial_assignment_valid(solution, problem, agent)) {
+            return false;
+        }
+    }
     return true;
 }
 
@@ -124,6 +138,177 @@ solution_t build_naive(const problem_t* problem) {
     return solution;
 }
 
-solution_t build_initial_solution(const problem_t* problem, const initial_params_t* initial_params) {
-    return build_naive(problem);
+solution_t drop_population(solution_t* population, size_t n_individuals, size_t index) {
+    assert(index < n_individuals);
+    // Solution to return
+    solution_t res = population[index];
+    // Free all the other solutions
+    for (size_t n = 0; n < n_individuals; n++) {
+        if (n != index) {
+            free_solution(population[n]);
+        }
+    }
+    free(population);
+
+    return res;
+}
+
+float initial_score(
+    const solution_t* individual,
+    const problem_t* problem
+) {
+    float score = 0.0;
+
+    if (!is_initial_solution_valid(individual, problem)) {
+        return INFINITY;
+    }
+
+    for (size_t agent = 0; agent < problem->n_agents; agent++) {
+        timetable_t time_table = build_time_table(individual, problem, 0);
+        float total_work_time = 0;
+        float extra_work_time = 0;
+
+        for (size_t day = 0; day < N_DAYS; day++) {
+            float work_time = calc_day_work_time(&time_table, problem, day);
+
+            total_work_time += work_time;
+            if (work_time >= 8 * 60) {
+                extra_work_time += work_time - 8 * 60;
+            }
+
+            // We are exceeding the 10h daily limit
+            if (work_time >= 10 * 60) {
+                score += work_time - 10 * 60;
+            }
+        }
+
+        // Total work time exceeds the 48h limit
+        if (total_work_time > 48 * 60) {
+            score += total_work_time - 48 * 60;
+        }
+
+        // Extra work time exceeds the 10h limit
+        if (extra_work_time > 10 * 60) {
+            score += extra_work_time - 10 * 60;
+        }
+
+        free_time_table(time_table);
+    }
+
+    return score;
+}
+
+void sort_individuals(solution_t* population, size_t n_individuals) {
+    // Implementing it using bubble sort because I'm lazy
+    for (size_t iter = 0; iter < n_individuals - 1; iter++) {
+        bool has_swapped = false;
+        for (size_t n = 0; n < n_individuals - 1; n++) {
+            if (population[n].score > population[n + 1].score) {
+                has_swapped = true;
+                solution_t tmp = population[n];
+                population[n] = population[n + 1];
+                population[n + 1] = tmp;
+            }
+        }
+        if (!has_swapped) break;
+    }
+}
+
+solution_t new_individual(
+    const problem_t* problem,
+    initial_params_t initial_params,
+    const solution_t* father,
+    const solution_t* mother
+) {
+    solution_t res = empty_solution(mother->n_assignments);
+
+    for (size_t n = 0; n < mother->n_assignments; n++) {
+        res.assignments[n] = mother->assignments[n];
+    }
+
+    if ((float)rand() / (float)RAND_MAX < initial_params.mutation_rate) {
+        res.assignments[rand() % res.n_assignments] = rand() % problem->n_agents;
+    }
+
+    size_t cross = rand() % res.n_assignments;
+    res.assignments[cross] = father->assignments[cross];
+
+    return res;
+}
+
+solution_t initial_genetical_simulation(
+    const problem_t* problem,
+    initial_params_t initial_params,
+    solution_t* population
+) {
+    assert(initial_params.survival_rate >= 0.0 && initial_params.survival_rate <= 1.0);
+
+    size_t survival_population = (size_t)(initial_params.survival_rate * (float)initial_params.population);
+    size_t reproduction_population = (size_t)(initial_params.reproduction_rate * (float)initial_params.population);
+
+    for (uint64_t round = 0; round < initial_params.rounds; round++) {
+        // Score all individuals
+        for (size_t n = 0; n < initial_params.population; n++) {
+            population[n].score = initial_score(&population[n], problem);
+        }
+
+        // Sort individuals by their score
+        sort_individuals(population, initial_params.population);
+
+        // Remove all individuals past `survival_population`
+        size_t n_individuals = initial_params.population;
+        for (size_t n = initial_params.population; n > 0; n--) {
+            if (!isfinite(population[n].score) || n > survival_population) {
+                free_solution(population[n]);
+                n_individuals--;
+            } else if (is_solution_valid(&population[n], problem)) {
+                // Valid solution found, return it!
+                return drop_population(population, n_individuals, n);
+            }
+        }
+
+        // Reproduce the best individuals until the pool is back up
+        while (n_individuals < initial_params.population) {
+            size_t subpop = n_individuals;
+            if (subpop > reproduction_population) subpop = subpop - reproduction_population;
+
+            size_t father_index = rand() % subpop;
+            size_t mother_index = rand() % subpop;
+            if (mother_index == father_index) mother_index = (mother_index + 1) % subpop;
+
+            population[n_individuals++] = new_individual(problem, initial_params, &population[father_index], &population[mother_index]);
+        }
+    }
+
+    fprintf(stderr, "No valid initial solution found!\n");
+    // Return best individual instead
+    return drop_population(population, initial_params.population, 0);
+}
+
+solution_t build_initial_solution(const problem_t* problem, initial_params_t initial_params) {
+    solution_t naive = build_naive(problem);
+
+    if (is_solution_valid(&naive, problem)) {
+        // Naive solution is good enough, return it
+        return naive;
+    }
+
+    // Naive solution is not good enough, start building a pool of initial solutions
+    //@invariant ∀i, i < n_individuals -> population[i]: defined
+    solution_t* population = malloc(sizeof(solution_t) * initial_params.population);
+    size_t n_individuals = 1;
+    population[0] = naive;
+
+    for (; n_individuals < initial_params.population; n_individuals++) {
+        population[n_individuals] = build_naive(problem);
+
+        if (is_solution_valid(&population[n_individuals], problem)) {
+            // return this solution
+            return drop_population(population, n_individuals + 1, n_individuals);
+        }
+    }
+
+    // No valid solution found so far, running the genetical algorithm
+
+    return initial_genetical_simulation(problem, initial_params, population);
 }

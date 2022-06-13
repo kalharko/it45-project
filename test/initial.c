@@ -200,9 +200,27 @@ void test_build_naive_phase2(void) {
     }
 }
 
+void test_drop_population(void) {
+    for (size_t round = 0; round < 100; round++) {
+        size_t length = 4 + rand() % 16;
+        solution_t* population = (solution_t*)malloc(sizeof(solution_t) * length);
+
+        for (size_t n = 0; n < length; n++) {
+            population[n] = empty_solution(1);
+            population[n].assignments[0] = n;
+        }
+
+        size_t x = rand() % length;
+
+        solution_t sol = drop_population(population, length, x);
+        TEST_ASSERT_EQUAL_UINT64(x, sol.assignments[0]);
+    }
+}
+
 void test_initial() {
     UNITY_BEGIN();
     RUN_TEST(test_build_naive);
     RUN_TEST(test_build_naive_phase2);
+    RUN_TEST(test_drop_population);
     UNITY_END();
 }

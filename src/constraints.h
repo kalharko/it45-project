@@ -15,11 +15,15 @@ bool has_matching_skills(const timetable_t* time_table, const problem_t* problem
 bool has_lunch_break(const timetable_t* time_table, const problem_t* problem);
 
 /**
+    Returns the number of hours worked in a day.
+**/
+float calc_day_work_time(const timetable_t* time_table, const problem_t* problem, size_t day);
+
+/**
     Returns the number of extra hours in the given time_table (can be 0).
     Returns -1 if the maximum legal work time is exceeded.
 **/
 float time_table_extra_hours(const int agent, const timetable_t* time_table, const problem_t* problem);
-
 
 /**
     Computes the distance traveled for a given day.
