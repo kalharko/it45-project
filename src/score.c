@@ -56,7 +56,8 @@ float score_speciality(solution_t* solution, const problem_t* problem) {
         }
     }
 
-    return score;
+    int alpha = 100/ problem->n_missions; // alpha as described in the subject
+    return alpha * score;
 }
 
 
@@ -114,14 +115,14 @@ float score_harmony(const solution_t* solution, const problem_t* problem) {
     // mean
     float overtime_mean = 0;
     for (int i=0; i<problem->n_agents; i++) {
-        overtime_mean += waisted_hours[i];
+        overtime_mean += overtime_hours[i];
     }
     overtime_mean /= problem->n_agents;
 
     // standard deviation
     float overtime_sd = 0;
     for (int i=0; i<problem->n_agents; i++) {
-        overtime_sd += pow(overtime_mean - waisted_hours[i], 2);
+        overtime_sd += pow(overtime_mean - overtime_hours[i], 2);
     }
     overtime_sd /= problem->n_agents;
     overtime_sd = sqrt(overtime_sd);
@@ -129,25 +130,26 @@ float score_harmony(const solution_t* solution, const problem_t* problem) {
 
     // // Distance
     float distances[problem->n_agents];
-    // gather waisted hours
+    // gather distance
     for (int i=0; i<problem->n_agents; i++) {
         time_table = build_time_table(solution, problem, i);
+        distances[i] = 0;
         for (int day=0; day<N_DAYS; day++) {
-            overtime_hours[i] += time_table_distance(&time_table, problem, day);
+            distances[i] += time_table_distance(&time_table, problem, day);
         }
     }
 
     // mean
     float distance_mean = 0;
     for (int i=0; i<problem->n_agents; i++) {
-        distance_mean += waisted_hours[i];
+        distance_mean += distances[i];
     }
     distance_mean /= problem->n_agents;
 
     // standard deviation
     float distance_sd = 0;
     for (int i=0; i<problem->n_agents; i++) {
-        distance_sd += pow(distance_mean - waisted_hours[i], 2);
+        distance_sd += pow(distance_mean - distances[i], 2);
     }
     distance_sd /= problem->n_agents;
     distance_sd = sqrt(distance_sd);
@@ -172,4 +174,55 @@ float score_harmony(const solution_t* solution, const problem_t* problem) {
     out /= 3;
 
     return out;
+}
+
+
+float score_SESSAD(const solution_t* solution, const problem_t* problem)
+{
+
+    // // sumWHO
+    float sumWHO = 0;
+    timetable_t time_table;
+    // gather waisted hours
+    for (int i=0; i<problem->n_agents; i++) {
+        time_table = build_time_table(solution, problem, i);
+        sumWHO += time_table_waisted_time(&time_table, problem);
+        sumWHO += time_table_extra_hours(&time_table, problem);
+    }
+
+    // // Distance
+    float distances[problem->n_agents];
+    float distance_max = 0;
+    // gather distance
+    for (int i=0; i<problem->n_agents; i++) {
+        time_table = build_time_table(solution, problem, i);
+        distances[i] = 0;
+        for (int day=0; day<N_DAYS; day++) {
+            distances[i] += time_table_distance(&time_table, problem, day);
+        }
+        if (distances[i] > distance_max) {
+            distance_max = distances[i];
+        }
+    }
+
+    // mean
+    float distance_mean = 0;
+    for (int i=0; i<problem->n_agents; i++) {
+        distance_mean += distances[i];
+    }
+    distance_mean /= problem->n_agents;
+
+
+    float out;
+
+    float beta = 100 / 45; // 45 = max nb of work hours in a week
+    float kapa = 100 / kapa_distance(problem);
+
+    out = beta * sumWHO;
+    out += kapa * distance_mean;
+    out += kapa * distance_max;
+    out /= 3;
+
+    return out;
+
 }
