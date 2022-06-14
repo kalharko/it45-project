@@ -48,5 +48,11 @@ void free_time_table(timetable_t time_table);
 void print_solution(solution_t solution);
 
 
+/// Creates a new, empty problem
+problem_t empty_problem();
+
+/// Frees all the memory allocated for a problem
+void free_problem(problem_t problem);
+
 
 #endif // UTILS_H

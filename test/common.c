@@ -1,26 +1,6 @@
 #include <defs.h>
 #include <stdlib.h>
 
-problem_t empty_problem() {
-    problem_t res = {
-        .agents = NULL,
-        .n_agents = 0,
-        .missions = NULL,
-        .n_missions = 0,
-        .distances = NULL,
-        .sessad_distances = NULL
-    };
-    return res;
-}
-
-void free_problem(problem_t problem) {
-    free(problem.agents);
-    free(problem.missions);
-
-    if (problem.distances != NULL) free(problem.distances);
-    if (problem.sessad_distances != NULL) free(problem.sessad_distances);
-}
-
 void problem_push_mission(
     problem_t* problem,
     uint64_t id,
@@ -122,6 +102,44 @@ void problem_set_dummy_distances(problem_t* problem, float dist_missions, float 
     for (size_t x = 0; x < problem->n_missions; x++) {
         problem->sessad_distances[x] = dist_sessad;
     }
+}
+
+void problem_set_random_distances(problem_t* problem, float max_dist) {
+    float* coordinates = malloc(sizeof(float) * 2 * problem->n_missions);
+
+    for (size_t n = 0; n < problem->n_missions; n++) {
+        // Rejection sampling :)
+        float x = 0.0, y = 0.0;
+        do {
+            x = ((float)rand() * 2.0 / (float)RAND_MAX - 1.0) * max_dist;
+            y = ((float)rand() * 2.0 / (float)RAND_MAX - 1.0) * max_dist;
+        } while (x * x + y * y > max_dist * max_dist);
+        coordinates[n * 2] = y;
+        coordinates[n * 2 + 1] = x;
+    }
+
+    problem->distances = malloc(sizeof(float*) * problem->n_missions);
+
+    for (size_t y = 0; y < problem->n_missions; y++) {
+        problem->distances[y] = malloc(sizeof(float) * problem->n_missions);
+
+        for (size_t x = 0; x < problem->n_missions; x++) {
+            float dy = coordinates[x * 2] - coordinates[y * 2];
+            float dx = coordinates[x * 2 + 1] - coordinates[y * 2 + 1];
+
+            problem->distances[y][x] = sqrt(dx * dx + dy * dy);
+        }
+    }
+
+    problem->sessad_distances = malloc(sizeof(float) * problem->n_missions);
+
+    for (size_t x = 0; x < problem->n_missions; x++) {
+        float dy = coordinates[x * 2];
+        float dx = coordinates[x * 2 + 1];
+        problem->sessad_distances[x] = sqrt(dx * dx + dy * dy);
+    }
+
+    free(coordinates);
 }
 
 void problem_shuffle_missions(problem_t* problem) {

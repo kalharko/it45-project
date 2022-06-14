@@ -63,9 +63,11 @@ timetable_t build_time_table(
             // and insert the current mission index (i) at this spot
             for (size_t n = 0; n < res.lengths[day]; n++) {
                 // Insert if mission[n].start_time <= mission[n+1].start_time
+                assert(assignments_today[n] < problem->n_missions);
+
                 if (mission->start_time <= problem->missions[assignments_today[n]].start_time) {
                     // assignments_today[n..].rshift()
-                    for (size_t o = res.lengths[day] - 1; o > n; o--) {
+                    for (size_t o = res.lengths[day]; o > n; o--) {
                         assignments_today[o] = assignments_today[o - 1];
                     }
                     // insert mission index (i)
@@ -117,4 +119,30 @@ void print_solution(solution_t solution) {
     printf("]\n");
     printf("score\t\t\t : %f\n", solution.score);
     printf("distance_traveled\t : %f\n", solution.distance_traveled);
+}
+
+
+problem_t empty_problem() {
+    problem_t res = {
+        .agents = NULL,
+        .n_agents = 0,
+        .missions = NULL,
+        .n_missions = 0,
+        .distances = NULL,
+        .sessad_distances = NULL
+    };
+    return res;
+}
+
+void free_problem(problem_t problem) {
+    free(problem.agents);
+    free(problem.missions);
+
+    if (problem.distances != NULL) {
+        for (size_t n = 0; n < problem.n_missions; n++) {
+            free(problem.distances[n]);
+        }
+        free(problem.distances);
+    }
+    if (problem.sessad_distances != NULL) free(problem.sessad_distances);
 }

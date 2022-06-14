@@ -123,6 +123,7 @@ void test_build_time_table_random(void) {
             for (size_t day = 0; day < N_DAYS; day++) {
                 for (size_t i = 0; i < time_table.lengths[day]; i++) {
                     TEST_ASSERT_LESS_THAN_UINT64(sum_missions, time_table.assignments[day][i]);
+                    TEST_ASSERT_LESS_THAN_UINT64(24 * 60, problem.missions[time_table.assignments[day][i]].start_time);
                 }
             }
 
@@ -136,7 +137,7 @@ void test_build_time_table_random(void) {
                 }
             }
 
-            // ∀d, ∀i>0, problem->missions[assignments[d][i]].end_time > problem->missions[assignments[d][i-1]].start_time
+            // ∀d, ∀i>0, problem->missions[assignments[d][i]].start_time > problem->missions[assignments[d][i-1]].start_time
             for (size_t day = 0; day < N_DAYS; day++) {
                 for (size_t i = 0; i + 1 < time_table.lengths[day]; i++) {
                     TEST_ASSERT_LESS_OR_EQUAL_UINT64(
