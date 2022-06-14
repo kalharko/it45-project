@@ -1,8 +1,11 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "defs.h"
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "defs.h"
 
 /**
     Returns a new, empty solution with room for n_assignments.
@@ -39,6 +42,10 @@ timetable_t build_time_table(
 
 /// Frees the memory allocated for a `timetable_t` instance
 void free_time_table(timetable_t time_table);
+
+
+/// Displays a solution to the consol
+void print_solution(solution_t solution);
 
 
 

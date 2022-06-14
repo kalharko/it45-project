@@ -106,3 +106,14 @@ void free_time_table(timetable_t time_table) {
         }
     }
 }
+
+void print_solution(solution_t solution) {
+    printf("\n\nSolution\n");
+    printf("n_assignments     : %d\n[", solution.n_assignments);
+    for (int i=0; i<solution.n_assignments; i++) {
+        printf("%d,", solution.assignments[i]);
+    }
+    printf("]\n");
+    printf("score             : %f\n", solution.score);
+    printf("distance_traveled : %f\n", solution.distance_traveled);
+}
