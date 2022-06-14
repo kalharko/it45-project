@@ -12,7 +12,7 @@ struct optimize_params {
 
 
 /// Random (valid) neighbor (using rejection sampling)
-solution_t random_neighbor(solution_t* solution, problem_t* problem);
+void random_neighbor(const solution_t* solution, const problem_t* problem ,solution_t* neighbor);
 
 solution_t optimize_solution(solution_t initial_solution, problem_t* problem);
 

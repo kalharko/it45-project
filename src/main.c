@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     int n_agents = 4;
     int n_missions = 45;
     double temperature = 5;
-    double temperature_mult = 0.95;
+    double temperature_mult = 0.8;
     double temperature_threshold = 0.15;
 
     // Initializes random number generator */
@@ -27,9 +27,13 @@ int main(int argc, char **argv) {
     problem_t problem;
     problem.n_agents = n_agents;
     problem.n_missions = n_missions;
+    problem.current_objective = 0;
     problem.temperature = temperature;
     problem.temperature_mult = temperature_mult;
     problem.temperature_threshold = temperature_threshold;
+
+    float validated_scores[3] = {0,0,0};
+    problem.validated_scores = validated_scores;
 
     // Distance
     float** distances = malloc(sizeof(float*) * problem.n_missions+1);
@@ -70,24 +74,29 @@ int main(int argc, char **argv) {
     initial_params.unassigned_penalty = 5; //?
     solution_t initial_solution = build_initial_solution(&problem, initial_params);
     score_solution(&initial_solution, &problem);
+    printf("\nSolution initiale :\n");
     print_solution(initial_solution);
 
 
     // // Launch optimization
-    // problem.validated_scores = maloc toussa toussa à 3 et initialisé à 0
     // optimises for each objective
-    // solution_t solution = initial_solution;
-    // for (int i = 0; i < 3; i++) {
-    //     problem.current_objective = i;
-    //     problem.temperature = temperature;
-    //     solution = optimize_solution(solution_t solution, problem_t* problem)
-    //     problem.validated_scores[i] = solution.score;
-    // }
+    solution_t solution = initial_solution;
+    for (int i = 0; i < 3; i++) {
+        printf("\nOptimize objective %d\n", i);
+        problem.current_objective = i;
+        problem.temperature = temperature;
+        solution = optimize_solution(solution, &problem);
+        problem.validated_scores[i] = solution.score;
+    }
 
 
     // // Display and save result to file
+    printf("\nFinal solution\n");
+    print_solution(solution);
 
-
+    printf("Objective 1 : nb of speciality miss match :\n\t%d\n", problem.validated_scores[0]);
+    printf("Objective 2 : total distance traveled\n\t%f\n", problem.validated_scores[1]);
+    printf("Objective 3 : overtime\n\t%f\n", problem.validated_scores[2]);
 
     return 0;
 }

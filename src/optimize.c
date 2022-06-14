@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <math.h>
 
 #include "optimize.h"
@@ -7,30 +9,31 @@
 #include "constraints.h"
 
 
-solution_t random_neighbor(solution_t* solution, problem_t* problem) {
+void random_neighbor(const solution_t* solution, const problem_t* problem, solution_t* neighbor) {
+    memcpy(neighbor->assignments, solution->assignments, sizeof(size_t)*solution->n_assignments);
+
     int neighbor_agent = rand() % problem->n_agents;
     int neighbor_mission = rand() % problem->n_missions;
 
     int old_mission = solution->assignments[neighbor_agent];
-    solution->assignments[neighbor_agent] = neighbor_mission;
+    neighbor->assignments[neighbor_agent] = neighbor_mission;
 
-    while (is_solution_valid(solution, problem) == false) {
+    while (is_solution_valid(neighbor, problem) == false) {
         // reverse the change
-        solution->assignments[neighbor_agent] = old_mission;
+        neighbor->assignments[neighbor_agent] = old_mission;
 
         // generate new neighbor
         neighbor_agent = rand() % problem->n_agents;
         neighbor_mission = rand() % problem->n_missions;
         old_mission = solution->assignments[neighbor_agent];
-        solution->assignments[neighbor_agent] = neighbor_mission;
+        neighbor->assignments[neighbor_agent] = neighbor_mission;
     }
-
-    return *solution;
 }
 
 solution_t optimize_solution(solution_t initial_solution, problem_t* problem) {
     solution_t current_solution = initial_solution;
-    solution_t next_solution;
+    solution_t next_solution = empty_solution(problem->n_missions);
+    float delta_f;
 
     // runs until the recuit temperature is low enough
     while (problem->temperature > problem->temperature_threshold){
@@ -38,17 +41,24 @@ solution_t optimize_solution(solution_t initial_solution, problem_t* problem) {
 
         // search for a solution until it is good enough
         do {
-            next_solution = random_neighbor(&current_solution, problem);
-            double delta_f = next_solution.score - current_solution.score;
+            random_neighbor(&current_solution, problem, &next_solution);
+            delta_f = next_solution.score - current_solution.score;
+            //printf("delta_f : %f - %f\n", next_solution.score, current_solution.score);
 
+            // if (delta_f == 0) {
+            //     solution_accepted = true;
+            // }
             if (delta_f < 0) {
                 solution_accepted = true;
+                printf("inferior");
             }
             else if (rand() < exp(-(delta_f)/problem->temperature)){
                 solution_accepted = true;
+                printf("luck");
             }
         } while (!solution_accepted);
 
+        printf("%f\n", current_solution.score);
         current_solution = next_solution;
         problem->temperature *= problem->temperature_mult;
     }
