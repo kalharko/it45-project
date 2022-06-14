@@ -222,3 +222,34 @@ bool check_path(char* path, bool verbose) {
 
     return valid;
 }
+
+
+float time_table_waisted_time(const timetable_t* time_table, const problem_t* problem)
+{
+    float distance;
+    float waisted_time = 0;
+    float time;
+    float speed = 50.0 * 1000.0 / 60.0; //833.333 m/min = 50km/h
+
+    for (size_t day = 0; day < N_DAYS; day++) {
+        if (time_table->lengths[day] > 1) {
+            size_t* assignments = time_table->assignments[day];
+            for (size_t j = 0; j < time_table->lengths[day]-1; j++) {
+                time = problem->missions[assignments[j]].end_time - problem->missions[assignments[j]].start_time;
+                distance = problem->distances[j][j+1];
+                waisted_time += time - distance / speed;
+            }
+        }
+    }
+
+    return waisted_time;
+}
+
+float kapa_distance(const problem_t* problem)
+{
+    float total = 0;
+    for (int i=0; i<problem->n_missions; i++) {
+        total += problem->sessad_distances[i];
+    }
+    return total / problem->n_missions;
+}

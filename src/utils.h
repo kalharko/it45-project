@@ -58,4 +58,11 @@ void free_problem(problem_t problem);
 /// Checks for data structure validity. Returns true if the program can proceed with this path.
 bool check_path(char* path, bool verbose);
 
+/// Returns the amount of hours waisted in the given time table
+float time_table_waisted_time(const timetable_t* time_table, const problem_t* problem);
+
+
+float kapa_distance(const problem_t* problem);
+
+
 #endif // UTILS_H
