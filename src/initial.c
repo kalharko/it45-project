@@ -26,6 +26,8 @@ bool is_initial_assignment_valid_sub(const timetable_t* time_table, const proble
         return false;
     }
 
+    // TODO: amplitude
+
     return true;
 }
 

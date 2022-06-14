@@ -141,6 +141,7 @@ solution_t optimize_solution(solution_t initial_solution, const problem_t* probl
             // TODO: problem->max_attempts
             if (attempts++ > 10000) {
                 fprintf(stderr, "Couldn't find a valid neighbor!\n");
+                free_solution(next_solution);
                 return current_solution;
             }
 
@@ -177,6 +178,8 @@ solution_t optimize_solution(solution_t initial_solution, const problem_t* probl
 
         temperature *= problem->temperature_mult;
     }
+
+    free_solution(next_solution);
 
     return current_solution;
 }

@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
     strcpy(concat_path, path);
     strcat(concat_path, "Intervenants.csv");
     problem.n_agents = get_file_line_count(concat_path);
-    agent_t agents[problem.n_agents];
+    agent_t* agents = (agent_t*)malloc(sizeof(agent_t) * problem.n_agents);
     load_agents(concat_path, agents, problem.n_agents);
     problem.agents = agents;
 
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
     strcpy(concat_path, path);
     strcat(concat_path, "Missions.csv");
     problem.n_missions = get_file_line_count(concat_path);
-    mission_t missions[problem.n_missions];
+    mission_t* missions = (mission_t*)malloc(sizeof(mission_t) * problem.n_missions);
     load_missions(concat_path, missions, problem.n_missions);
     problem.missions = missions;
 
@@ -105,6 +105,9 @@ int main(int argc, char **argv) {
     printf("Objective 1 : nb of speciality miss match :\n\t%f\n", problem.validated_scores[0]);
     printf("Objective 2 : total distance traveled\n\t%f\n", problem.validated_scores[1]);
     printf("Objective 3 : overtime\n\t%f\n", problem.validated_scores[2]);
+
+    free_problem(problem);
+    free_solution(solution);
 
     return 0;
 }
