@@ -55,8 +55,15 @@ add_executable(it45-project-bench
     bench/main.c
     ${SRC_FILES}
 )
-target_link_libraries(it45-project-bench m)
-target_compile_options(it45-project-bench PRIVATE -O3)
+
+find_package(OpenMP)
+if (${OpenMP_C_FOUND})
+    target_link_libraries(it45-project-bench m OpenMP::OpenMP_C)
+    target_compile_options(it45-project-bench PRIVATE -O3 -pthread -fopenmp=libomp)
+else()
+    target_compile_options(it45-project-bench PRIVATE -O3)
+endif()
+
 add_custom_target(bench
     COMMAND it45-project-bench
     DEPENDS it45-project-bench

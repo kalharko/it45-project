@@ -2,7 +2,7 @@
 #include <time.h>
 #include <string.h>
 
-#define ROUNDS 1000
+#define ROUNDS 200
 #define MAX_TIME 60
 
 #define BENCH_BEGIN { \
@@ -123,9 +123,8 @@ bench_t bench_initial_sub(size_t n_agents, size_t n_missions) {
 
     size_t count_success = 0;
 
-    time_t start = time(NULL);
-    size_t n = 0;
-    for (; n < ROUNDS && time(NULL) - start < MAX_TIME; n++) {
+    #pragma omp parallel for reduction(+:count_success)
+    for (size_t n = 0; n < ROUNDS; n++) {
         problem_t problem = empty_problem();
 
         for (size_t agent = 0; agent < n_agents; agent++) {
@@ -167,7 +166,7 @@ bench_t bench_initial_sub(size_t n_agents, size_t n_missions) {
         }
     }
 
-    res.avg = (float)count_success / (float)n;
+    res.avg = (float)count_success / (float)ROUNDS;
     return res;
 }
 
@@ -202,9 +201,8 @@ bench_t bench_initial_diff_sub(size_t n_agents, size_t n_missions) {
 
     size_t count_success = 0;
 
-    time_t start = time(NULL);
-    size_t n = 0;
-    for (; n < ROUNDS && time(NULL) - start < MAX_TIME; n++) {
+    #pragma omp parallel for reduction(+:count_success)
+    for (size_t n = 0; n < ROUNDS; n++) {
         problem_t problem = empty_problem();
 
         for (size_t agent = 0; agent < n_agents; agent++) {
@@ -254,7 +252,7 @@ bench_t bench_initial_diff_sub(size_t n_agents, size_t n_missions) {
         free_solution(naive);
     }
 
-    res.avg = (float)count_success / (float)n;
+    res.avg = (float)count_success / (float)ROUNDS;
     return res;
 }
 
