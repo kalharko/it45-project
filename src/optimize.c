@@ -58,6 +58,11 @@ solution_t optimize_solution(solution_t initial_solution, problem_t* problem) {
 
 // TODO: split into multiple functions for each condition
 bool is_solution_valid(solution_t* solution, const problem_t* problem) {
+    // Check that every mission is assigned
+    for (size_t n = 0; n < solution->n_assignments; n++) {
+        if (solution->assignments[n] >= problem->n_agents) return false;
+    }
+
     // Check that each agent can go to each of his assignments
     solution->distance_traveled = 0;
     for (int agent_index = 0; agent_index < problem->n_agents; agent_index++) {

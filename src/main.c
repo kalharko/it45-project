@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     strcpy(concat_path, path);
     strcat(concat_path, "Distances.csv");
     load_distances(problem.n_missions+1, concat_path, distances);
-    problem.distances = distances;
+    load_distances_into_problem(&problem, distances);
 
     // Agent
     agent_t agents[n_agents];
@@ -69,8 +69,8 @@ int main(int argc, char **argv) {
     initial_params.mutation_rate = 0.08;
     initial_params.unassigned_penalty = 5; //?
     solution_t initial_solution = build_initial_solution(&problem, initial_params);
-    //score_solution(&initial_solution, &problem);
-    //print_solution(initial_solution);
+    score_solution(&initial_solution, &problem);
+    print_solution(initial_solution);
 
 
     // // Launch optimization
