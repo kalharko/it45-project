@@ -48,3 +48,17 @@ if (${unity_FOUND})
         WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
     )
 endif()
+
+# Benchmark project
+project(it45-project-bench)
+add_executable(it45-project-bench
+    bench/main.c
+    ${SRC_FILES}
+)
+target_link_libraries(it45-project-bench m)
+target_compile_options(it45-project-bench PRIVATE -O3)
+add_custom_target(bench
+    COMMAND it45-project-bench
+    DEPENDS it45-project-bench
+    WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
+)
