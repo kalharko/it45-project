@@ -111,7 +111,7 @@ float time_table_distance(const timetable_t* time_table, const problem_t* proble
     float total_distance = 0;
     float distance;
     float time;
-    float speed = 833.333; //833.333 m/min = 50km/h
+    float speed = 50.0 * 1000.0 / 60.0; //833.333 m/min = 50km/h
 
     assert(day < N_DAYS);
     size_t* assignments = time_table->assignments[day];

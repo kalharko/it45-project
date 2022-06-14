@@ -226,15 +226,12 @@ solution_t new_individual(
     solution_t res = empty_solution(mother->n_assignments);
 
     for (size_t n = 0; n < mother->n_assignments; n++) {
-        res.assignments[n] = mother->assignments[n];
+        res.assignments[n] = rand() % 2 == 0 ? mother->assignments[n] : father->assignments[n];
     }
 
     if ((float)rand() / (float)RAND_MAX < initial_params.mutation_rate) {
         res.assignments[rand() % res.n_assignments] = rand() % problem->n_agents;
     }
-
-    size_t cross = rand() % res.n_assignments;
-    res.assignments[cross] = father->assignments[cross];
 
     return res;
 }
@@ -258,9 +255,16 @@ solution_t initial_genetical_simulation(
         // Sort individuals by their score
         sort_individuals(population, initial_params.population);
 
+        // printf(
+        //     "Round: %zu, best score: %f, median score: %f\n",
+        //     round,
+        //     population[0].score,
+        //     population[initial_params.population / 2].score
+        // );
+
         // Remove all individuals past `survival_population`
         size_t n_individuals = initial_params.population;
-        for (size_t n = initial_params.population; n > 0; n--) {
+        for (size_t n = initial_params.population - 1; n > 0; n--) {
             if (!isfinite(population[n].score) || n > survival_population) {
                 free_solution(population[n]);
                 n_individuals--;
@@ -284,8 +288,11 @@ solution_t initial_genetical_simulation(
     }
 
     fprintf(stderr, "No valid initial solution found!\n");
+
     // Return best individual instead
-    return drop_population(population, initial_params.population, 0);
+    solution_t res = drop_population(population, initial_params.population, 0);
+    res.score = -1.0;
+    return res;
 }
 
 solution_t build_initial_solution(const problem_t* problem, initial_params_t initial_params) {

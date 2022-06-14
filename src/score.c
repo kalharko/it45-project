@@ -8,8 +8,7 @@
 float score_solution(solution_t* solution, const problem_t* problem) {
     float score = 0;
 
-    switch (problem->current_objective)
-    {
+    switch (problem->current_objective) {
         case 0 : // minimize the number of affectation with the wrong specialty
             score = score_speciality(solution, problem);
         break;
@@ -40,16 +39,16 @@ float score_solution(solution_t* solution, const problem_t* problem) {
 
 
 // returns the number of assignments where the agent and mission specialty do not match
-float score_speciality(solution_t* solution, const problem_t* problem)
-{
+float score_speciality(solution_t* solution, const problem_t* problem) {
     float score = 0;
 
-    for (int i=0; i<solution->n_assignments; i++)
-    {
-        if (problem->missions[solution->assignments[i]].speciality
-            != problem->agents[solution->assignments[i]].speciality) {
-                score += 1;
-            }
+    for (int i=0; i<solution->n_assignments; i++) {
+        size_t assignment = solution->assignments[i];
+        if (assignment > SIZE_MAX) continue;
+
+        if (problem->missions[assignment].speciality != problem->agents[assignment].speciality) {
+            score += 1.0;
+        }
     }
 
     return score;
@@ -57,8 +56,7 @@ float score_speciality(solution_t* solution, const problem_t* problem)
 
 
 // returns the total distance traveled by the agents
-float score_distance(solution_t* solution, const problem_t* problem)
-{
+float score_distance(solution_t* solution, const problem_t* problem) {
     // should be already calculated by the is_solution_valid() function
     if (solution->distance_traveled != 0) {
         return solution->distance_traveled;
@@ -68,7 +66,6 @@ float score_distance(solution_t* solution, const problem_t* problem)
 }
 
 
-float score_overtime(solution_t* solution, const problem_t* problem)
-{
+float score_overtime(solution_t* solution, const problem_t* problem) {
     return 0;
 }

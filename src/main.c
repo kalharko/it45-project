@@ -10,6 +10,10 @@
 #include "utils.h"
 #include "score.h"
 
+#ifdef unix
+#include <unistd.h>
+#endif
+
 int main(int argc, char **argv) {
     char path[128] = "../Instances/45-4/"; // will be replaced by argument
     char concat_path[128];
@@ -20,7 +24,11 @@ int main(int argc, char **argv) {
     double temperature_threshold = 0.15;
 
     // Initializes random number generator */
+    #ifdef unix
+    srand(time(NULL) ^ getpid());
+    #else
     srand(time(NULL));
+    #endif
 
 
     // // Initialize the problem and load data from csv
@@ -36,10 +44,10 @@ int main(int argc, char **argv) {
     problem.validated_scores = validated_scores;
 
     // Distance
-    float** distances = malloc(sizeof(float*) * problem.n_missions+1);
+    float** distances = malloc(sizeof(float*) * (problem.n_missions + 1));
 
     for (size_t n = 0; n < problem.n_missions+1; n++) {
-        distances[n] = malloc(sizeof(float) * problem.n_missions+1);
+        distances[n] = malloc(sizeof(float) * (problem.n_missions + 1));
         for (size_t o = 0; o < problem.n_missions+1; o++) {
             distances[n][o] = 0.0;
         }
@@ -66,16 +74,18 @@ int main(int argc, char **argv) {
 
     // // Initial solution
     initial_params_t initial_params;
-    initial_params.population = 50;
-    initial_params.rounds = 5;
-    initial_params.survival_rate = 0.3;
-    initial_params.survival_rate = 0.4;
-    initial_params.mutation_rate = 0.08;
-    initial_params.unassigned_penalty = 5; //?
+    initial_params.population = 200;
+    initial_params.rounds = 1000;
+    initial_params.survival_rate = 0.5;
+    initial_params.reproduction_rate = 0.25;
+    initial_params.mutation_rate = 0.25;
+    initial_params.unassigned_penalty = 30.0; // how many minutes an unassigned mission is worth
     solution_t initial_solution = build_initial_solution(&problem, initial_params);
     score_solution(&initial_solution, &problem);
     printf("\nSolution initiale :\n");
     print_solution(initial_solution);
+
+    if (initial_solution.score < 0.0) return 127;
 
 
     // // Launch optimization
@@ -94,7 +104,7 @@ int main(int argc, char **argv) {
     printf("\nFinal solution\n");
     print_solution(solution);
 
-    printf("Objective 1 : nb of speciality miss match :\n\t%d\n", problem.validated_scores[0]);
+    printf("Objective 1 : nb of speciality miss match :\n\t%f\n", problem.validated_scores[0]);
     printf("Objective 2 : total distance traveled\n\t%f\n", problem.validated_scores[1]);
     printf("Objective 3 : overtime\n\t%f\n", problem.validated_scores[2]);
 

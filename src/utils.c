@@ -65,7 +65,7 @@ timetable_t build_time_table(
                 // Insert if mission[n].start_time <= mission[n+1].start_time
                 if (mission->start_time <= problem->missions[assignments_today[n]].start_time) {
                     // assignments_today[n..].rshift()
-                    for (size_t o = res.lengths[day]; o > n; o--) {
+                    for (size_t o = res.lengths[day] - 1; o > n; o--) {
                         assignments_today[o] = assignments_today[o - 1];
                     }
                     // insert mission index (i)
@@ -109,11 +109,12 @@ void free_time_table(timetable_t time_table) {
 
 void print_solution(solution_t solution) {
     printf("\n\nSolution\n");
-    printf("n_assignments     : %d\n[", solution.n_assignments);
+    printf("n_assignments\t\t : %zu\n[", solution.n_assignments);
+    printf("assignments\t\t :");
     for (int i=0; i<solution.n_assignments; i++) {
-        printf("%d,", solution.assignments[i]);
+        printf("%zu, ", solution.assignments[i]);
     }
     printf("]\n");
-    printf("score             : %f\n", solution.score);
-    printf("distance_traveled : %f\n", solution.distance_traveled);
+    printf("score\t\t\t : %f\n", solution.score);
+    printf("distance_traveled\t : %f\n", solution.distance_traveled);
 }
