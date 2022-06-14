@@ -76,7 +76,7 @@ float calc_day_work_time(const timetable_t* time_table, const problem_t* problem
     return res;
 }
 
-float time_table_extra_hours(const int agent, const timetable_t* time_table, const problem_t* problem)
+float time_table_extra_hours(const timetable_t* time_table, const problem_t* problem)
 {
     float total_work_time = 0;
     float extra_work_time = 0;

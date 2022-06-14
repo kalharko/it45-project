@@ -4,6 +4,7 @@
 #include "optimize.h"
 #include "utils.h"
 #include "score.h"
+#include "constraints.h"
 
 
 float score_solution(solution_t* solution, const problem_t* problem) {
@@ -73,4 +74,102 @@ float score_distance(solution_t* solution, const problem_t* problem) {
 
 float score_overtime(solution_t* solution, const problem_t* problem) {
     return 0;
+}
+
+
+float score_harmony(const solution_t* solution, const problem_t* problem) {
+    // // Waisted hours
+    float waisted_hours[problem->n_agents];
+    timetable_t time_table;
+    // gather waisted hours
+    for (int i=0; i<problem->n_agents; i++) {
+        time_table = build_time_table(solution, problem, i);
+        waisted_hours[i] = time_table_waisted_time(&time_table, problem);
+    }
+
+    // mean
+    float waisted_hours_mean = 0;
+    for (int i=0; i<problem->n_agents; i++) {
+        waisted_hours_mean += waisted_hours[i];
+    }
+    waisted_hours_mean /= problem->n_agents;
+
+    // standard deviation
+    float waisted_hours_sd = 0;
+    for (int i=0; i<problem->n_agents; i++) {
+        waisted_hours_sd += pow(waisted_hours_mean - waisted_hours[i], 2);
+    }
+    waisted_hours_sd /= problem->n_agents;
+    waisted_hours_sd = sqrt(waisted_hours_sd);
+
+
+    // // Overtime hours
+    float overtime_hours[problem->n_agents];
+    // gather waisted hours
+    for (int i=0; i<problem->n_agents; i++) {
+        time_table = build_time_table(solution, problem, i);
+        overtime_hours[i] = time_table_extra_hours(&time_table, problem);
+    }
+
+    // mean
+    float overtime_mean = 0;
+    for (int i=0; i<problem->n_agents; i++) {
+        overtime_mean += waisted_hours[i];
+    }
+    overtime_mean /= problem->n_agents;
+
+    // standard deviation
+    float overtime_sd = 0;
+    for (int i=0; i<problem->n_agents; i++) {
+        overtime_sd += pow(overtime_mean - waisted_hours[i], 2);
+    }
+    overtime_sd /= problem->n_agents;
+    overtime_sd = sqrt(overtime_sd);
+
+
+    // // Distance
+    float distances[problem->n_agents];
+    // gather waisted hours
+    for (int i=0; i<problem->n_agents; i++) {
+        time_table = build_time_table(solution, problem, i);
+        for (int day=0; day<N_DAYS; day++) {
+            overtime_hours[i] += time_table_distance(&time_table, problem, day);
+        }
+    }
+
+    // mean
+    float distance_mean = 0;
+    for (int i=0; i<problem->n_agents; i++) {
+        distance_mean += waisted_hours[i];
+    }
+    distance_mean /= problem->n_agents;
+
+    // standard deviation
+    float distance_sd = 0;
+    for (int i=0; i<problem->n_agents; i++) {
+        distance_sd += pow(distance_mean - waisted_hours[i], 2);
+    }
+    distance_sd /= problem->n_agents;
+    distance_sd = sqrt(distance_sd);
+
+    // // regime mean
+    float regime_mean = 0;
+    for (int i=0; i<problem->n_agents; i++) {
+        regime_mean += problem->agents[i].hours;
+    }
+    regime_mean /= problem->n_agents;
+
+    // // final calcul
+    float out;
+
+    float zeta = 100 / regime_mean;
+    float lambda = 100 / 10;        // 10 is number of tolerated overtime per week
+    float kapa = 100 / kapa_distance(problem);
+
+    out += zeta * waisted_hours_sd;
+    out += lambda * overtime_sd;
+    out += kapa * distance_sd;
+    out /= 3;
+
+    return out;
 }

@@ -14,5 +14,7 @@ float score_distance(solution_t* solution, const problem_t* problem);
 
 float score_overtime(solution_t* solution, const problem_t* problem);
 
+float score_harmony(const solution_t* solution, const problem_t* problem);
+
 
 #endif // SCORE_H
