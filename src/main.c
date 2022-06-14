@@ -15,10 +15,11 @@
 #endif
 
 int main(int argc, char **argv) {
-    char path[128] = "../Instances/45-4/"; // will be replaced by argument
+    char path[128] = "../Instances/100-10/"; // will be replaced by argument
     char concat_path[128];
-    double temperature = 5;
-    double temperature_mult = 0.8;
+
+    double temperature = 10;
+    double temperature_mult = 0.99;
     double temperature_threshold = 0.15;
 
     // Initializes random number generator
@@ -96,7 +97,6 @@ int main(int argc, char **argv) {
         solution = optimize_solution(solution, &problem);
         problem.validated_scores[i] = solution.score;
     }
-
 
     // // Display and save result to file
     printf("\nFinal solution\n");

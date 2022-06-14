@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 
 #include "optimize.h"
 #include "utils.h"
@@ -10,7 +11,7 @@
 
 /// Returns false if the `mission` cannot be assigned to `agent`.
 /// If true is returned, then it is still possible that `mission` cannot be assigned to `agent`.
-bool can_assign(const solution_t* solution, const problem_t* problem, size_t agent, size_t mission) {
+bool can_assign(const solution_t* solution, const problem_t* problem, size_t agent, size_t mission, size_t ignore_overlap) {
     mission_t* mission1 = &problem->missions[mission];
 
     if (
@@ -19,10 +20,14 @@ bool can_assign(const solution_t* solution, const problem_t* problem, size_t age
     ) return false;
 
     for (size_t n = 0; n < solution->n_assignments; n++) {
-        if (solution->assignments[n] == agent) {
+        if (solution->assignments[n] == agent && n != ignore_overlap) {
             mission_t* mission2 = &problem->missions[n];
 
-            if (mission1->start_time <= mission2->end_time && mission1->end_time >= mission2->start_time) {
+            if (
+                mission1->day == mission2->day
+                && mission1->start_time <= mission2->end_time
+                && mission1->end_time >= mission2->start_time
+            ) {
                 return false;
             }
         }
@@ -31,52 +36,100 @@ bool can_assign(const solution_t* solution, const problem_t* problem, size_t age
     return true;
 }
 
-bool random_neighbor(const solution_t* solution, const problem_t* problem, solution_t* neighbor) {
+
+bool random_neighbor_single(const solution_t* solution, const problem_t* problem, solution_t* neighbor) {
     memcpy(neighbor->assignments, solution->assignments, sizeof(size_t)*solution->n_assignments);
+    neighbor->distance_traveled = 0.0;
 
-    size_t neighbor_agent = rand() % problem->n_agents;
-    size_t neighbor_mission = rand() % problem->n_missions;
-
+    size_t new_agent = rand() % problem->n_agents;
+    size_t new_mission = rand() % problem->n_missions;
     size_t count = 0;
+
     for (; count < problem->n_agents; count++) {
         // Check if agent has another overlapping mission
-        if (can_assign(solution, problem, neighbor_agent, neighbor_mission)) {
+        if (can_assign(solution, problem, new_agent, new_mission, SIZE_MAX)) {
             break;
         } else {
-            neighbor_agent = (neighbor_agent + 1) % problem->n_agents;
+            new_agent = (new_agent + 1) % problem->n_agents;
         }
     }
 
     if (count >= problem->n_agents) return false;
 
-    printf("%zu %zu\n", neighbor_agent, neighbor_mission);
+    neighbor->assignments[new_mission] = new_agent;
 
-    size_t old_mission = solution->assignments[neighbor_agent];
-    neighbor->assignments[neighbor_agent] = neighbor_mission;
-
+    bool is_valid = is_solution_valid(neighbor, problem);
     score_solution(neighbor, problem);
 
-    return is_solution_valid(neighbor, problem) && neighbor->score >= 0.0;
-        // reverse the change
-        // neighbor->assignments[neighbor_agent] = old_mission;
-        // return false;
+    return is_valid && neighbor->score >= 0.0;
+}
 
-        // generate new neighbor
-        // neighbor_agent = rand() % problem->n_agents;
-        // neighbor_mission = rand() % problem->n_missions;
-        // old_mission = solution->assignments[neighbor_agent];
-        // neighbor->assignments[neighbor_agent] = neighbor_mission;
-    // }
-    // return true;
+bool random_neighbor_dual(const solution_t* solution, const problem_t* problem, solution_t* neighbor) {
+    memcpy(neighbor->assignments, solution->assignments, sizeof(size_t)*solution->n_assignments);
+    neighbor->distance_traveled = 0.0;
+
+    size_t new_agent = rand() % problem->n_agents;
+    size_t new_mission = rand() % problem->n_missions;
+    size_t old_mission = rand() % problem->n_missions;
+
+    // Find old mission (TODO: optimize)
+    for (size_t n = 0; n < problem->n_missions; n++) {
+        if (solution->assignments[(n + old_mission) % problem->n_missions] == new_agent) {
+            old_mission += n;
+            break;
+        }
+    }
+
+    size_t count = 0;
+    for (; count < problem->n_agents; count++) {
+        // Check if agent has another overlapping mission
+        if (can_assign(solution, problem, new_agent, new_mission, old_mission)) {
+            break;
+        } else {
+            new_agent = (new_agent + 1) % problem->n_agents;
+
+            // Find a new old mission
+            old_mission = rand() % problem->n_missions;
+            for (size_t n = 0; n < problem->n_missions; n++) {
+                if (solution->assignments[(n + old_mission) % problem->n_missions] == new_agent) {
+                    old_mission += n;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (count >= problem->n_agents) return false;
+
+    size_t old_agent = solution->assignments[new_mission];
+    neighbor->assignments[new_mission] = new_agent;
+    neighbor->assignments[old_mission] = old_agent;
+
+    bool is_valid = is_solution_valid(neighbor, problem);
+    score_solution(neighbor, problem);
+
+    return is_valid && neighbor->score >= 0.0;
+}
+
+bool random_neighbor(const solution_t* solution, const problem_t* problem, solution_t* neighbor) {
+    if (rand() % 4 == 0) {
+        return random_neighbor_single(solution, problem, neighbor);
+    } else {
+        return random_neighbor_dual(solution, problem, neighbor);
+    }
 }
 
 solution_t optimize_solution(solution_t initial_solution, const problem_t* problem) {
     solution_t current_solution = initial_solution;
+    bool is_valid = is_solution_valid(&current_solution, problem);
+    assert(is_valid);
+
     score_solution(&current_solution, problem);
 
     solution_t next_solution = empty_solution(problem->n_missions);
 
     float temperature = problem->temperature;
+    float best_score = current_solution.score;
 
     // runs until the recuit temperature is low enough
     while (temperature > problem->temperature_threshold) {
@@ -100,22 +153,27 @@ solution_t optimize_solution(solution_t initial_solution, const problem_t* probl
 
             if (delta_f == 0) {
                 solution_accepted = true;
-                printf("equal\n");
-            }
-            if (delta_f < 0) {
+            } else if (delta_f < 0) {
                 solution_accepted = true;
-                printf("inferior\n");
-            } else if (rand() < exp(-(delta_f) / temperature)){
+            } else if (rand() < exp(-(delta_f) / temperature)) {
                 solution_accepted = true;
                 printf("luck\n");
             }
         } while (!solution_accepted);
 
-        printf("%f -> %f\n", current_solution.score, next_solution.score);
-        print_solution(next_solution);
+        if (problem->current_objective == 2) {
+            assert(next_solution.distance_traveled <= current_solution.distance_traveled);
+        }
+
         solution_t tmp = current_solution;
         current_solution = next_solution;
         next_solution = tmp;
+
+        if (current_solution.score < best_score) {
+            printf("Achieved new best score: old = %.4f, new = %.4f\n", best_score, current_solution.score);
+            best_score = current_solution.score;
+        }
+        // print_solution(next_solution);
 
         temperature *= problem->temperature_mult;
     }
@@ -123,7 +181,6 @@ solution_t optimize_solution(solution_t initial_solution, const problem_t* probl
     return current_solution;
 }
 
-// TODO: split into multiple functions for each condition
 bool is_solution_valid(solution_t* solution, const problem_t* problem) {
     // Check that every mission is assigned
     for (size_t n = 0; n < solution->n_assignments; n++) {
