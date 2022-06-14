@@ -35,6 +35,28 @@ int load_distances(size_t n_missions, char *filename, float **data) {
     return 0;
 }
 
+void load_distances_into_problem(problem_t* problem, float** data) {
+    assert(problem != NULL);
+    problem->distances = malloc(sizeof(float*) * problem->n_missions);
+    assert(problem->distances != NULL);
+
+    for (size_t y = 0; y < problem->n_missions; y++) {
+        problem->distances[y] = malloc(sizeof(float) * problem->n_missions);
+        assert(problem->distances[y] != NULL);
+
+        for (size_t x = 0; x < problem->n_missions; x++) {
+            problem->distances[y][x] = data[y + 1][x + 1];
+        }
+    }
+
+    problem->sessad_distances = malloc(sizeof(float) * problem->n_missions);
+    assert(problem->sessad_distances != NULL);
+
+    for (size_t x = 0; x < problem->n_missions; x++) {
+        problem->sessad_distances[x] = data[0][x + 1];
+    }
+}
+
 int get_file_line_count(char *filename) {
     char line[4098];
     int n_missions = 0;
