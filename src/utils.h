@@ -54,5 +54,7 @@ problem_t empty_problem();
 /// Frees all the memory allocated for a problem
 void free_problem(problem_t problem);
 
+/// Check the path ends with '/' and data structure validity. Returns true if the program can proceed with this path
+bool check_path(char path[]);
 
 #endif // UTILS_H
