@@ -3,7 +3,7 @@
 #include <string.h>
 
 #define ROUNDS 1000
-#define MAX_TIME 60.0
+#define MAX_TIME 60
 
 #define BENCH_BEGIN { \
     bench_t res; \
@@ -97,15 +97,180 @@ bench_t bench_naive_sub(size_t n_agents, size_t n_missions) {
 void bench_naive() {
     FILE* out = fopen("naive.csv", "w");
 
-    for (size_t n_missions = 10; n_missions <= 100; n_missions += 5) {
-        fprintf(out, ",%zu", n_missions);
+    for (size_t n_agents = 2; n_agents <= 16; n_agents++) {
+        fprintf(out, ",%zu", n_agents);
     }
     fprintf(out, "\n");
 
-    for (size_t n_agents = 2; n_agents <= 16; n_agents++) {
-        fprintf(out, "%zu", n_agents);
-        for (size_t n_missions = 10; n_missions <= 100; n_missions += 5) {
+    for (size_t n_missions = 10; n_missions <= 100; n_missions += 5) {
+        fprintf(out, "%zu", n_missions);
+        for (size_t n_agents = 2; n_agents <= 16; n_agents++) {
             bench_t res = bench_naive_sub(n_agents, n_missions);
+            printf("%zu/%zu: %.4f ± %.4f\n", res.n_agents, res.n_missions, res.avg, res.sigma);
+
+            fprintf(out, ",%.6f", res.avg);
+        }
+        fprintf(out, "\n");
+    }
+
+    fclose(out);
+}
+
+bench_t bench_initial_sub(size_t n_agents, size_t n_missions) {
+    bench_t res;
+    res.n_agents = n_agents;
+    res.n_missions = n_missions;
+
+    size_t count_success = 0;
+
+    time_t start = time(NULL);
+    size_t n = 0;
+    for (; n < ROUNDS && time(NULL) - start < MAX_TIME; n++) {
+        problem_t problem = empty_problem();
+
+        for (size_t agent = 0; agent < n_agents; agent++) {
+            problem_push_agent(&problem,
+                agent,
+                rand() % N_SKILLS,
+                rand() % N_SPECIALTIES,
+                24 + rand() % 16
+            );
+        }
+
+        for (size_t mission = 0; mission < n_missions; mission++) {
+            uint64_t start = 8 * 60 + rand() % (10 * 60);
+            problem_push_mission(&problem,
+                mission,
+                rand() % N_SKILLS,
+                rand() % N_SPECIALTIES,
+                1 + rand() % (N_DAYS - 2),
+                start,
+                start + (6 + rand() % 13) * 10
+            );
+        }
+
+        problem_shuffle_missions(&problem);
+        problem_set_random_distances(&problem, 10000);
+
+        initial_params_t initial_params = {
+            .population = 100,
+            .rounds = 100,
+            .survival_rate = 0.75,
+            .reproduction_rate = 0.25,
+            .mutation_rate = 0.25,
+            .unassigned_penalty = 30.0
+        };
+
+        solution_t solution = build_initial_solution(&problem, initial_params);
+        if (is_solution_valid(&solution, &problem)) {
+            count_success++;
+        }
+    }
+
+    res.avg = (float)count_success / (float)n;
+    return res;
+}
+
+void bench_initial() {
+    FILE* out = fopen("initial.csv", "w");
+
+    for (size_t n_agents = 2; n_agents <= 16; n_agents++) {
+        fprintf(out, ",%zu", n_agents);
+    }
+    fprintf(out, "\n");
+
+
+    for (size_t n_missions = 10; n_missions <= 100; n_missions += 5) {
+        fprintf(out, "%zu", n_missions);
+        for (size_t n_agents = 2; n_agents <= 16; n_agents++) {
+            bench_t res = bench_initial_sub(n_agents, n_missions);
+            printf("%zu/%zu: %.4f ± %.4f\n", res.n_agents, res.n_missions, res.avg, res.sigma);
+
+            fprintf(out, ",%.6f", res.avg);
+        }
+        fprintf(out, "\n");
+    }
+
+    fclose(out);
+}
+
+
+bench_t bench_initial_diff_sub(size_t n_agents, size_t n_missions) {
+    bench_t res;
+    res.n_agents = n_agents;
+    res.n_missions = n_missions;
+
+    size_t count_success = 0;
+
+    time_t start = time(NULL);
+    size_t n = 0;
+    for (; n < ROUNDS && time(NULL) - start < MAX_TIME; n++) {
+        problem_t problem = empty_problem();
+
+        for (size_t agent = 0; agent < n_agents; agent++) {
+            problem_push_agent(&problem,
+                agent,
+                rand() % N_SKILLS,
+                rand() % N_SPECIALTIES,
+                24 + rand() % 16
+            );
+        }
+
+        for (size_t mission = 0; mission < n_missions; mission++) {
+            uint64_t start = 8 * 60 + rand() % (10 * 60);
+            problem_push_mission(&problem,
+                mission,
+                rand() % N_SKILLS,
+                rand() % N_SPECIALTIES,
+                1 + rand() % (N_DAYS - 2),
+                start,
+                start + (6 + rand() % 13) * 10
+            );
+        }
+
+        problem_shuffle_missions(&problem);
+        problem_set_random_distances(&problem, 10000);
+
+        initial_params_t initial_params = {
+            .population = 100,
+            .rounds = 100,
+            .survival_rate = 0.75,
+            .reproduction_rate = 0.25,
+            .mutation_rate = 0.25,
+            .unassigned_penalty = 30.0
+        };
+
+        solution_t naive = build_naive(&problem);
+
+        if (!is_solution_valid(&naive, &problem)) {
+            solution_t solution = build_initial_solution(&problem, initial_params);
+            if (is_solution_valid(&solution, &problem)) {
+                count_success++;
+            }
+
+            free_solution(solution);
+        }
+
+        free_solution(naive);
+    }
+
+    res.avg = (float)count_success / (float)n;
+    return res;
+}
+
+void bench_initial_diff() {
+    FILE* out = fopen("initial-diff.csv", "w");
+
+    for (size_t n_agents = 2; n_agents <= 16; n_agents++) {
+        fprintf(out, ",%zu", n_agents);
+    }
+    fprintf(out, "\n");
+
+
+    for (size_t n_missions = 10; n_missions <= 100; n_missions += 5) {
+        fprintf(out, "%zu", n_missions);
+        for (size_t n_agents = 2; n_agents <= 16; n_agents++) {
+            bench_t res = bench_initial_diff_sub(n_agents, n_missions);
             printf("%zu/%zu: %.4f ± %.4f\n", res.n_agents, res.n_missions, res.avg, res.sigma);
 
             fprintf(out, ",%.6f", res.avg);
@@ -119,5 +284,15 @@ void bench_naive() {
 int main(int argc, char* argv[]) {
     srand(127643); // Nothing up my sleeve
 
-    if (argc == 2 && strcmp(argv[1], "naive") == 0) bench_naive();
+    bool all = argc == 2 && strcmp(argv[1], "all") == 0;
+
+    if (all || argc == 2 && strcmp(argv[1], "naive") == 0) {
+        bench_naive();
+    }
+    if (all || argc == 2 && strcmp(argv[1], "initial") == 0) {
+        bench_initial();
+    }
+    if (all || argc == 2 && strcmp(argv[1], "initial-diff") == 0) {
+        bench_initial_diff();
+    }
 }

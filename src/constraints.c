@@ -27,12 +27,13 @@ bool has_lunch_break(const timetable_t* time_table, const problem_t* problem)
         size_t* assignments = time_table->assignments[day];
         // if more than one assignments and an assignment before and after 13h
         if (time_table->lengths[day] > 1
-            && problem->missions[assignments[0]].end_time <= 780
-            && problem->missions[assignments[time_table->lengths[day]-1]].start_time >= 780) {
+            && problem->missions[assignments[0]].end_time <= 13 * 60
+            && problem->missions[assignments[time_table->lengths[day]-1]].start_time >= 13 * 60
+        ) {
 
             // search first assignment after 13h
-            int a = 0;
-            while (problem->missions[assignments[a]].end_time < 780) {
+            int a = 1;
+            while (problem->missions[assignments[a]].end_time < 780 && a < time_table->lengths[day]) {
                 a++;
             }
 

@@ -289,8 +289,6 @@ solution_t initial_genetical_simulation(
         }
     }
 
-    fprintf(stderr, "No valid initial solution found!\n");
-
     // Return best individual instead
     solution_t res = drop_population(population, initial_params.population, 0);
     res.score = -1.0;

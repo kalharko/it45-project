@@ -94,7 +94,10 @@ int main(int argc, char **argv) {
     printf("\nSolution initiale :\n");
     print_solution(initial_solution);
 
-    if (initial_solution.score < 0.0) return 127;
+    if (initial_solution.score < 0.0) {
+        fprintf(stderr, "No valid initial solution found!\n");
+        return 127;
+    }
 
 
     // // Launch optimization
