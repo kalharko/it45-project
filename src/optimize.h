@@ -12,7 +12,7 @@ struct optimize_params {
 
 /// Returns false if the `mission` cannot be assigned to `agent`.
 /// If true is returned, then it is still possible that `mission` cannot be assigned to `agent`.
-bool can_assign(const solution_t* solution, const problem_t* problem, size_t agent, size_t mission);
+bool can_assign(const solution_t* solution, const problem_t* problem, size_t agent, size_t mission, size_t ignore_mission);
 
 /// Random (valid) neighbor (using rejection sampling)
 bool random_neighbor(const solution_t* solution, const problem_t* problem ,solution_t* neighbor);

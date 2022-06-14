@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "optimize.h"
 #include "utils.h"
 #include "score.h"
 
@@ -15,6 +16,7 @@ float score_solution(solution_t* solution, const problem_t* problem) {
 
         case 1 : // minimize the total distance traveled
             if (score_speciality(solution, problem) > problem->validated_scores[0]) {
+                solution->score = -1;
                 return -1;
             }
             score = score_distance(solution, problem);
@@ -22,7 +24,9 @@ float score_solution(solution_t* solution, const problem_t* problem) {
 
         case 2 : // minimize the overtime
             if (score_speciality(solution, problem) > problem->validated_scores[0] ||
-                score_distance(solution, problem) > problem->validated_scores[1]) {
+                score_distance(solution, problem) > problem->validated_scores[1]
+            ) {
+                solution->score = -1;
                 return -1;
             }
             score = score_overtime(solution, problem);
@@ -60,9 +64,10 @@ float score_distance(solution_t* solution, const problem_t* problem) {
     // should be already calculated by the is_solution_valid() function
     if (solution->distance_traveled != 0) {
         return solution->distance_traveled;
+    } else {
+        is_solution_valid(solution, problem);
+        return solution->distance_traveled;
     }
-
-    return 0;
 }
 
 
