@@ -10,6 +10,8 @@ void load_distances_into_problem(problem_t* problem, float** data);
 
 int load_agents(char *filename, agent_t agents[], int nb_agent);
 
+int get_file_line_count(char *filename);
+
 int load_missions(char *filename, mission_t missions[], int nb_mission);
 
 #endif // LOAD_H

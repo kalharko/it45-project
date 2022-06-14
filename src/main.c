@@ -17,13 +17,11 @@
 int main(int argc, char **argv) {
     char path[128] = "../Instances/45-4/"; // will be replaced by argument
     char concat_path[128];
-    int n_agents = 4;
-    int n_missions = 45;
     double temperature = 5;
     double temperature_mult = 0.8;
     double temperature_threshold = 0.15;
 
-    // Initializes random number generator */
+    // Initializes random number generator
     #ifdef unix
     srand(time(NULL) ^ getpid());
     #else
@@ -33,8 +31,6 @@ int main(int argc, char **argv) {
 
     // // Initialize the problem and load data from csv
     problem_t problem;
-    problem.n_agents = n_agents;
-    problem.n_missions = n_missions;
     problem.current_objective = 0;
     problem.temperature = temperature;
     problem.temperature_mult = temperature_mult;
@@ -42,6 +38,22 @@ int main(int argc, char **argv) {
 
     float validated_scores[3] = {0,0,0};
     problem.validated_scores = validated_scores;
+
+    // Agent
+    strcpy(concat_path, path);
+    strcat(concat_path, "Intervenants.csv");
+    problem.n_agents = get_file_line_count(concat_path);
+    agent_t agents[problem.n_agents];
+    load_agents(concat_path, agents, problem.n_agents);
+    problem.agents = agents;
+
+    // // Missions
+    strcpy(concat_path, path);
+    strcat(concat_path, "Missions.csv");
+    problem.n_missions = get_file_line_count(concat_path);
+    mission_t missions[problem.n_missions];
+    load_missions(concat_path, missions, problem.n_missions);
+    problem.missions = missions;
 
     // Distance
     float** distances = malloc(sizeof(float*) * (problem.n_missions + 1));
@@ -56,20 +68,6 @@ int main(int argc, char **argv) {
     strcat(concat_path, "Distances.csv");
     load_distances(problem.n_missions+1, concat_path, distances);
     load_distances_into_problem(&problem, distances);
-
-    // Agent
-    agent_t agents[n_agents];
-    strcpy(concat_path, path);
-    strcat(concat_path, "Intervenants.csv");
-    load_agents(concat_path, agents, n_agents);
-    problem.agents = agents;
-
-    // // Missions
-    mission_t missions[n_missions];
-    strcpy(concat_path, path);
-    strcat(concat_path, "Missions.csv");
-    load_missions(concat_path, missions, n_missions);
-    problem.missions = missions;
 
 
     // // Initial solution
