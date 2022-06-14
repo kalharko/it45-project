@@ -47,6 +47,7 @@ void free_time_table(timetable_t time_table);
 /// Displays a solution to the consol
 void print_solution(solution_t solution);
 
-
+/// Check the path ends with '/' and data structure validity. Returns true if the program can proceed with this path
+bool check_path(char path[]);
 
 #endif // UTILS_H

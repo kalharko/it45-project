@@ -77,3 +77,17 @@ void test_load_missions(void) {
     }
 
 }
+
+
+void test_get_file_line_count(void) {
+
+    TEST_ASSERT_EQUAL_INT(
+        45,
+        get_file_line_count("../Instances/45-4/Missions.csv")
+    );
+
+    TEST_ASSERT_EQUAL_INT(
+        4,
+        get_file_line_count("../Instances/45-4/Intervenants.csv")
+    );
+}

@@ -1,6 +1,10 @@
-#include "utils.h"
 #include <stdbool.h>
 #include <assert.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "utils.h"
+#include "load.h"
 
 solution_t empty_solution(size_t n_assignments) {
     solution_t res;
@@ -117,4 +121,76 @@ void print_solution(solution_t solution) {
     printf("]\n");
     printf("score\t\t\t : %f\n", solution.score);
     printf("distance_traveled\t : %f\n", solution.distance_traveled);
+}
+
+bool check_path(char path[]) {
+    // Check path ends with '/'
+    int i;
+    for (i=0; path[i] != '\0'; i++) {
+    }
+    if (path[i-1] != '/') {
+        path[i] = '/';
+        path[i+1] = '\0';
+    }
+
+    // Check path validity
+    char file_names[4][20] = {
+        "Distances.csv",
+        "Intervenants.csv",
+        "Missions.csv"
+    };
+    char concat_path[128];
+    bool tests[4];
+    bool valid = true;
+    FILE *file;
+
+
+    for (i=0; i<3; i++) {
+        strcpy(concat_path, path);
+        strcat(concat_path, file_names[i]);
+        file = fopen(concat_path, "r");
+        if (file != NULL) {
+            tests[i] = true;
+        } else {
+            tests[i] = false;
+            valid = false;
+        }
+        fclose(file);
+    }
+
+    // Number of missions and matching distances
+    tests[3] = false;
+    if (valid) {
+        strcpy(concat_path, path);
+        strcat(concat_path, "Missions.csv");
+        int n_missions = get_file_line_count(concat_path);
+        strcpy(concat_path, path);
+        strcat(concat_path, "Distances.csv");
+        if (get_file_line_count(concat_path) == n_missions + 1) {
+            tests[3] = true;
+        }
+        else {
+            valid = false;
+        }
+    }
+
+    // Report
+    if (valid == false) {
+        printf("Data structure invalid / file not found :\n");
+        for (i=0; i<3; i++) {
+            printf("%s : ", file_names[i]);
+            if (tests[i]) {
+                printf("PASS\n");
+            }
+            else {
+                printf("FAIL / Missing\n");
+            }
+        }
+
+        if (tests[3] == false) {
+            printf("Miss match between number of missions and the distance matrix size\n");
+        }
+    }
+
+    return valid;
 }

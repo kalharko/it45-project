@@ -22,6 +22,7 @@ int main() {
     RUN_TEST(test_load_distances);
     RUN_TEST(test_load_agents);
     RUN_TEST(test_load_missions);
+    RUN_TEST(test_get_file_line_count);
 
     UNITY_END();
 
