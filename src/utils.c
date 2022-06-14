@@ -151,7 +151,7 @@ void free_problem(problem_t problem) {
     if (problem.sessad_distances != NULL) free(problem.sessad_distances);
 }
 
-bool check_path(char path[]) {
+bool check_path(char* path, bool verbose) {
     // Check path ends with '/'
     int i;
     for (i=0; path[i] != '\0'; i++) {
@@ -179,11 +179,11 @@ bool check_path(char path[]) {
         file = fopen(concat_path, "r");
         if (file != NULL) {
             tests[i] = true;
+            fclose(file);
         } else {
             tests[i] = false;
             valid = false;
         }
-        fclose(file);
     }
 
     // Number of missions and matching distances
@@ -203,7 +203,7 @@ bool check_path(char path[]) {
     }
 
     // Report
-    if (valid == false) {
+    if (valid == false && verbose) {
         printf("Data structure invalid / file not found :\n");
         for (i=0; i<3; i++) {
             printf("%s : ", file_names[i]);

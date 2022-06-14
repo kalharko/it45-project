@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     char path[128];
     strcpy(path, argv[1]);
     printf("\n%s\n", path);
-    if (check_path(path) == false) {
+    if (check_path(path, true) == false) {
         return 1;
     }
     char concat_path[128];

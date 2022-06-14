@@ -160,12 +160,12 @@ void test_build_time_table_random(void) {
 
 void test_check_path() {
     char path[128] = "../Instances/45-4";
-    TEST_ASSERT_TRUE (check_path(path));
+    TEST_ASSERT_TRUE (check_path(path, true));
     TEST_ASSERT_EQUAL(path[17], '/');
     TEST_ASSERT_EQUAL(path[18], '\0');
 
     char fake_path[128] = "/does_not_exist/fake";
-    TEST_ASSERT_FALSE(check_path(path)); //FAIL do not know why
+    TEST_ASSERT_FALSE(check_path(fake_path, false)); //FAIL do not know why
 }
 
 void test_utils() {

@@ -19,6 +19,9 @@ add_executable(it45-project
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
 target_link_libraries(it45-project PRIVATE m) # Link math library
+if (${CMAKE_BUILD_TYPE} EQUAL "Release")
+    target_compile_options(it45-project PRIVATE -O3)
+endif()
 
 # Testing project
 find_package(unity CONFIG)
@@ -37,6 +40,7 @@ if (${unity_FOUND})
     )
 
     target_link_libraries(it45-project-test unity::framework m)
+    target_compile_options(it45-project-test PRIVATE -g)
 
     add_custom_target(test
         COMMAND it45-project-test

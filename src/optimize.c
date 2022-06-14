@@ -75,7 +75,7 @@ bool random_neighbor_dual(const solution_t* solution, const problem_t* problem, 
     // Find old mission (TODO: optimize)
     for (size_t n = 0; n < problem->n_missions; n++) {
         if (solution->assignments[(n + old_mission) % problem->n_missions] == new_agent) {
-            old_mission += n;
+            old_mission = (old_mission + n) % problem->n_missions;
             break;
         }
     }
@@ -92,7 +92,7 @@ bool random_neighbor_dual(const solution_t* solution, const problem_t* problem, 
             old_mission = rand() % problem->n_missions;
             for (size_t n = 0; n < problem->n_missions; n++) {
                 if (solution->assignments[(n + old_mission) % problem->n_missions] == new_agent) {
-                    old_mission += n;
+                    old_mission = (old_mission + n) % problem->n_missions;
                     break;
                 }
             }
