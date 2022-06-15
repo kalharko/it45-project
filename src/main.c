@@ -102,9 +102,9 @@ int main(int argc, char **argv) {
     initial_params.unassigned_penalty = 30.0; // how many minutes an unassigned mission is worth
 
     solution_t final_solution = empty_solution(problem.n_missions);
-    float final_employees = 1000000;
-    float final_students = 1000000;
-    float final_SESSAD = 1000000;
+    float final_employees = INFINITY;
+    float final_students = INFINITY;
+    float final_SESSAD = INFINITY;
     for (int iteration=0; iteration<n_iterations; iteration++) {
         printf("\n\n====== Iteration %d ======\n", iteration);
 
