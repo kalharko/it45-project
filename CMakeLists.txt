@@ -12,6 +12,7 @@ set(SRC_FILES
     src/utils.c
     src/score.c
     src/constraints.c
+    src/visualisation.c
 )
 
 add_executable(it45-project

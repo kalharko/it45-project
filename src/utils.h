@@ -7,9 +7,6 @@
 
 #include "defs.h"
 
-// Global
-extern FILE *log_file;
-
 /**
     Returns a new, empty solution with room for n_assignments.
     If `n_assignments == 0`, then no array will be allocated.
@@ -46,11 +43,6 @@ timetable_t build_time_table(
 /// Frees the memory allocated for a `timetable_t` instance
 void free_time_table(timetable_t time_table);
 
-
-/// Displays a solution to the consol
-void print_solution(const solution_t *solution, const problem_t* problem);
-
-
 /// Creates a new, empty problem
 problem_t empty_problem();
 
@@ -68,6 +60,5 @@ float time_table_waisted_time(const timetable_t* time_table, const problem_t* pr
 float kapa_distance(const problem_t* problem);
 
 
-void log_for_graph(const solution_t* solution, const problem_t* problem);
 
 #endif // UTILS_H

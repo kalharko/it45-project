@@ -9,6 +9,7 @@
 #include "optimize.h"
 #include "utils.h"
 #include "score.h"
+#include "visualisation.h"
 
 #ifdef unix
 #include <unistd.h>

@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "score.h"
 #include "constraints.h"
+#include "visualisation.h"
 
 /// Returns false if the `mission` cannot be assigned to `agent`.
 /// If true is returned, then it is still possible that `mission` cannot be assigned to `agent`.
