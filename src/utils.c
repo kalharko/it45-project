@@ -332,7 +332,7 @@ void write_problem(const problem_t* problem, const char* path) {
     FILE* missions = fopen(buffer, "w");
     assert(missions != NULL);
 
-    for (size_t n = 0; n < problem->n_agents; n++) {
+    for (size_t n = 0; n < problem->n_missions; n++) {
         fprintf(missions,
             "%" PRIu64 ",%" PRIu8 ",%" PRIu16 ",%" PRIu16 ",%s,%s\n",
             problem->missions[n].id,
@@ -351,6 +351,14 @@ void write_problem(const problem_t* problem, const char* path) {
 
 void problem_set_random_distances(problem_t* problem, float max_dist) {
     float* coordinates = malloc(sizeof(float) * 2 * problem->n_missions);
+
+    if (problem->distances) {
+        for (size_t n = 0; n < problem->n_missions; n++) {
+            free(problem->distances[n]);
+        }
+        free(problem->distances);
+    }
+    if (problem->sessad_distances) free(problem->sessad_distances);
 
     for (size_t n = 0; n < problem->n_missions; n++) {
         // Rejection sampling :)

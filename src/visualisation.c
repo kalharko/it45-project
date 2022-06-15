@@ -12,15 +12,14 @@
 
 void print_solution(const solution_t* solution, const problem_t* problem) {
     // Gather information
-    timetable_t time_table;
     float wasted_time = 0;
     float overtime = 0;
     for (int i=0; i<problem->n_agents; i++) {
-        time_table = build_time_table(solution, problem, i);
+        timetable_t time_table = build_time_table(solution, problem, i);
         wasted_time += time_table_waisted_time(&time_table, problem);
         overtime += time_table_extra_hours(&time_table, problem);
+        free_time_table(time_table);
     }
-    free_time_table(time_table);
 
     // Display
     printf("\n\nSolution\n");
