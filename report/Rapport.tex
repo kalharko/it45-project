@@ -225,6 +225,7 @@ Pour cela, nous utilisons une forme relaxée des règles:
 
 \begin{itemize}
     \item Une mission peut ne pas être réalisée
+    \item Deux missions pour un agent peuvent se chevaucher
     \item On peut dépasser les heures maximales à travailler par jour
     \item On peut dépasser la limite des heures supplémentaires autorisées
     \item On peut ne pas respecter l'amplitude de la journée de travail
@@ -347,22 +348,22 @@ Sur l'instance \og 45-4 \fg, nous obtenons comme solution:
     \label{tab:45-4}
 \end{table}
 
-La distance totale parcourue est de $423.7$ km et $28$ affectations ont un problème de spécialité.
+La distance totale parcourue est de $423.7$ km et $28$ affectations ont la mauvaise spécialité.
 Les scores à optimiser ont pour valeur:
 
 \begin{itemize}
-    \item $f_{\text{employees}} = 70.66$
+    \item $f_{\text{employees}} = 0.587$
     \item $f_{\text{students}} = 60.0$
-    \item $f_{\text{SESSAD}} = 3144.87$
+    \item $f_{\text{SESSAD}} = 484.87$
 \end{itemize}
 
 Pour le problème \og 100-10 \fg, on obtient une solution avec une distance totale parcourue de $1096$ km et $72$ affectations avec la mauvaise spécialité.
 Les scores sont:
 
 \begin{itemize}
-    \item $f_{\text{employees}} = 51.93$
-    \item $f_{\text{students}} = 69.0$
-    \item $f_{\text{SESSAD}} = 6845.35$
+    \item $f_{\text{employees}} = 1.129$
+    \item $f_{\text{students}} = 72.0$
+    \item $f_{\text{SESSAD}} = 911.37$
 \end{itemize}
 
 \subsection{Taux de succès des fonctions d'initialisation}
@@ -410,6 +411,13 @@ Ci dessous est représenté l'évolution des objectifs au fil des itérations. L
     \includegraphics[width=0.8\textwidth]{Images/score_evolution_graph.png}
     \caption{Évolution des objectifs au fil des itérations}
     \label{fig:score_evolution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{Images/3d_visualisation.png}
+    \caption{Représentation du chemin suivi par 10 solutions initiales différentes lors de l'optimisation}
+    \label{fig:score_3d}
 \end{figure}
 
 \subsection{Visualisations de la solution}
@@ -473,3 +481,11 @@ Vous trouverez le code source du projet sur \emph{Github} :\newline \href{https:
 
 
 \end{document}
+
+
+
+
+
+
+
+

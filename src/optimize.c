@@ -158,9 +158,9 @@ solution_t optimize_solution(solution_t initial_solution, const problem_t* probl
                 solution_accepted = true;
             } else if (delta_f < 0) {
                 solution_accepted = true;
-            } else if (rand() < exp(-(delta_f) / temperature)) {
+            } else if (1.0/(rand()%100) < exp(-(delta_f) / temperature)) {
                 solution_accepted = true;
-                printf("luck\n");
+                //printf("luck\n");
             }
         } while (!solution_accepted);
 
