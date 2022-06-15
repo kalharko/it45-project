@@ -17,7 +17,7 @@ bool can_assign(const solution_t* solution, const problem_t* problem, size_t age
 /// Random (valid) neighbor (using rejection sampling)
 bool random_neighbor(const solution_t* solution, const problem_t* problem ,solution_t* neighbor);
 
-solution_t optimize_solution(solution_t initial_solution, const problem_t* problem);
+solution_t optimize_solution(solution_t initial_solution, const problem_t* problem, int cut_off);
 
 // Check for solution validity
 bool is_solution_valid(solution_t* solution, const problem_t* problem);

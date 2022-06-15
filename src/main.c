@@ -16,8 +16,8 @@
 #endif
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
-        printf("Usage : ./it45-project <path to folder data>\n");
+    if (argc != 4) {
+        printf("Usage : ./it45-project <path to folder data> <nb of iteration> <cut off>\n");
         return 1;
     }
 
@@ -29,12 +29,15 @@ int main(int argc, char **argv) {
     }
     char concat_path[128];
 
+    int n_iterations = atoi(argv[2]);
+    int cut_off = atoi(argv[3]);
+
     // open file for logging
     log_file = fopen("../log.csv", "w");
 
-    double temperature = 10;
-    double temperature_mult = 0.99;
-    double temperature_threshold = 0.15;
+    double temperature = 10; //20
+    double temperature_mult = 0.99; //0.995
+    double temperature_threshold = 0.15; //4
 
     // Initializes random number generator
     #ifdef unix
@@ -89,7 +92,6 @@ int main(int argc, char **argv) {
     free(distances);
     distances = NULL;
 
-
     // // Initial solution
     initial_params_t initial_params;
     initial_params.population = 200;
@@ -98,39 +100,68 @@ int main(int argc, char **argv) {
     initial_params.reproduction_rate = 0.25;
     initial_params.mutation_rate = 0.25;
     initial_params.unassigned_penalty = 30.0; // how many minutes an unassigned mission is worth
-    solution_t initial_solution = build_initial_solution(&problem, initial_params);
-    score_solution(&initial_solution, &problem);
-    printf("\nSolution initiale :\n");
-    print_solution(&initial_solution, &problem);
 
-    if (initial_solution.score < 0.0) {
-        fprintf(stderr, "No valid initial solution found!\n");
-        return 127;
-    }
+    solution_t final_solution = empty_solution(problem.n_missions);
+    float final_employees = 1000000;
+    float final_students = 1000000;
+    float final_SESSAD = 1000000;
+    for (int iteration=0; iteration<n_iterations; iteration++) {
+        printf("\n\n====== Iteration %d ======\n", iteration);
+
+        solution_t initial_solution = build_initial_solution(&problem, initial_params);
+        score_solution(&initial_solution, &problem);
+        //printf("\nSolution initiale :");
+        //print_solution(&initial_solution, &problem);
+
+        if (initial_solution.score < 0.0) {
+            fprintf(stderr, "No valid initial solution found!\n");
+            return 127;
+        }
 
 
-    // // Launch optimization
-    // optimises for each objective
-    solution_t solution = initial_solution;
-    for (int i = 0; i < 3; i++) {
-        printf("\nOptimize objective %d\n", i);
-        problem.current_objective = i;
+        // // Launch optimization
+        // optimises for each objective
+        solution_t solution = initial_solution;
+        for (int i = 0; i < 3; i++) {
+            printf("\nOptimize objective %d", i);
+            problem.current_objective = i;
+            problem.temperature = temperature;
+            solution = optimize_solution(solution, &problem, cut_off);
+            problem.validated_scores[i] = solution.score;
+        }
+
+        // // check if it is the best solution encountered yet
+        if (problem.validated_scores[0] < final_employees) {
+            final_employees = problem.validated_scores[0];
+            final_solution.distance_traveled = solution.distance_traveled;
+            final_solution.assignments = solution.assignments;
+            printf("  Solution améliorée, f_employees : %f\n", final_employees);
+            print_solution(&solution, &problem);
+        }
+
+        // // Reset for next iteration
+        if (iteration+1 < n_iterations) {
+            fprintf(log_file, "===========\n");
+            for (int j=0; j<3; j++) {
+            problem.validated_scores[j] = 0;
+            }
+        }
+        problem.current_objective = 0;
         problem.temperature = temperature;
-        solution = optimize_solution(solution, &problem);
-        problem.validated_scores[i] = solution.score;
     }
 
-    // // Display and save result to file
-    printf("\nFinal solution\n");
-    print_solution(&solution, &problem);
+    // // Display
+    printf("\n\n===== Final solution =====\n");
+    print_solution(&final_solution, &problem);
 
     printf("\nObjectifs :\n");
     printf("f_employees :\t\t%f\n", problem.validated_scores[0]);
     printf("f_students :\t\t%f\n", problem.validated_scores[1]);
     printf("f_SESSAD :\t\t%f\n", problem.validated_scores[2]);
 
+    // // Free Memory
     free_problem(problem);
-    free_solution(solution);
+    free_solution(final_solution);
     fclose(log_file);
 
     return 0;

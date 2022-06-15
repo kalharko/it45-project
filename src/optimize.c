@@ -120,7 +120,8 @@ bool random_neighbor(const solution_t* solution, const problem_t* problem, solut
     }
 }
 
-solution_t optimize_solution(solution_t initial_solution, const problem_t* problem) {
+solution_t optimize_solution(solution_t initial_solution, const problem_t* problem, int cut_of) {
+    int cut_of_value = 0;
     solution_t current_solution = initial_solution;
     bool is_valid = is_solution_valid(&current_solution, problem);
     assert(is_valid);
@@ -172,8 +173,17 @@ solution_t optimize_solution(solution_t initial_solution, const problem_t* probl
         next_solution = tmp;
 
         if (current_solution.score < best_score) {
-            printf("Achieved new best score: old = %.4f, new = %.4f\n", best_score, current_solution.score);
+            //printf("Achieved new best score: old = %.4f, new = %.4f\n", best_score, current_solution.score);
             best_score = current_solution.score;
+            cut_of_value = 0;
+        }
+        else {
+            cut_of_value += 1;
+            if (cut_of_value >= cut_of) {
+                log_for_graph(&current_solution, problem);
+                printf("Cut_off");
+                return current_solution;
+            }
         }
         // print_solution(next_solution);
 
