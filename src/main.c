@@ -129,8 +129,8 @@ int main(int argc, char **argv) {
     printf("f_students :\t\t%f\n", problem.validated_scores[1]);
     printf("f_SESSAD :\t\t%f\n", problem.validated_scores[2]);
 
-    problem_set_random_distances(&problem, 10000);
-    write_problem(&problem, "../Instances/with-pos");
+    // problem_set_random_distances(&problem, 10000);
+    // write_problem(&problem, "../Instances/with-pos");
 
     free_problem(problem);
     free_solution(solution);
