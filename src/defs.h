@@ -49,6 +49,9 @@ struct problem {
     // Distances between the missions and the sessad center
     float* sessad_distances;
 
+    // 2D Coordinates, may be NULL
+    float* coordinates;
+
     //Recuit parameters
     double temperature;
     double temperature_mult;

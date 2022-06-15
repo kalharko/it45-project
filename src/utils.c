@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
+#include <math.h>
 
 #include "utils.h"
 #include "load.h"
@@ -122,7 +124,8 @@ problem_t empty_problem() {
         .missions = NULL,
         .n_missions = 0,
         .distances = NULL,
-        .sessad_distances = NULL
+        .sessad_distances = NULL,
+        .coordinates = NULL
     };
     return res;
 }
@@ -138,6 +141,7 @@ void free_problem(problem_t problem) {
         free(problem.distances);
     }
     if (problem.sessad_distances != NULL) free(problem.sessad_distances);
+    if (problem.coordinates != NULL) free(problem.coordinates);
 }
 
 bool check_path(char* path, bool verbose) {
@@ -241,4 +245,144 @@ float kapa_distance(const problem_t* problem)
         total += problem->sessad_distances[i];
     }
     return total / problem->n_missions;
+}
+
+void write_problem(const problem_t* problem, const char* path) {
+    const char* SKILLS[] = {
+        "LSF",
+        "LPC"
+    };
+    const char* SPECIALITIES[] = {
+        "Jardinage",
+        "Mecanique",
+        "Menuiserie",
+        "Electricite",
+        "Musique"
+    };
+
+    size_t len = strlen(path);
+    char* buffer = malloc(sizeof(char) * (len + 32));
+
+    // Create directory if it isn't present
+    sprintf(buffer, "mkdir -p \"%s\"", path); // Vulnerable to CWE 78
+    if (system(buffer)) {
+        free(buffer);
+        fprintf(stderr, "Couldn't create directory %s!", path);
+        return;
+    }
+
+    strcpy(buffer, path);
+    if (buffer[len - 1] != '/') {
+        buffer[len] = '/';
+        buffer[len + 1] = 0;
+    }
+
+    char* tail = &buffer[len + 1];
+
+    if (problem->distances && problem->sessad_distances) {
+        strcpy(tail, "Distances.csv");
+        FILE* distances = fopen(buffer, "w");
+        assert(distances != NULL);
+        fprintf(distances, "0.0"); // SESSAD->SESSAD
+
+        for (size_t n = 0; n < problem->n_missions; n++) {
+            fprintf(distances, ",%f", problem->sessad_distances[n]);
+        }
+        fprintf(distances, "\n");
+
+        for (size_t i = 0; i < problem->n_missions; i++) {
+            fprintf(distances, "%f", problem->sessad_distances[i]);
+            for (size_t j = 0; j < problem->n_missions; j++) {
+                fprintf(distances, ",%f", problem->distances[i][j]);
+            }
+            fprintf(distances, "\n");
+        }
+        fclose(distances);
+    }
+
+    if (problem->coordinates) {
+        strcpy(tail, "Coordinates.csv");
+        FILE* coordinates = fopen(buffer, "w");
+        assert(coordinates != NULL);
+
+        for (size_t n = 0; n < problem->n_missions; n++) {
+            fprintf(coordinates, "%f,%f\n", problem->coordinates[2 * n + 1], problem->coordinates[2 * n]);
+        }
+
+        fclose(coordinates);
+    }
+
+    strcpy(tail, "Intervenants.csv");
+    FILE* agents = fopen(buffer, "w");
+    assert(agents != NULL);
+
+    for (size_t n = 0; n < problem->n_agents; n++) {
+        fprintf(agents,
+            "%" PRIu64 ",%s,%s,%" PRIu32 "\n",
+            problem->agents[n].id,
+            SKILLS[problem->agents[n].skill],
+            SPECIALITIES[problem->agents[n].speciality],
+            problem->agents[n].hours
+        );
+    }
+
+    fclose(agents);
+
+    strcpy(tail, "Missions.csv");
+    FILE* missions = fopen(buffer, "w");
+    assert(missions != NULL);
+
+    for (size_t n = 0; n < problem->n_agents; n++) {
+        fprintf(missions,
+            "%" PRIu64 ",%" PRIu8 ",%" PRIu16 ",%" PRIu16 ",%s,%s\n",
+            problem->missions[n].id,
+            problem->missions[n].day,
+            problem->missions[n].start_time,
+            problem->missions[n].end_time,
+            SKILLS[problem->missions[n].skill],
+            SPECIALITIES[problem->missions[n].speciality]
+        );
+    }
+
+    fclose(missions);
+
+    free(buffer);
+}
+
+void problem_set_random_distances(problem_t* problem, float max_dist) {
+    float* coordinates = malloc(sizeof(float) * 2 * problem->n_missions);
+
+    for (size_t n = 0; n < problem->n_missions; n++) {
+        // Rejection sampling :)
+        float x = 0.0, y = 0.0;
+        do {
+            x = ((float)rand() * 2.0 / (float)RAND_MAX - 1.0) * max_dist;
+            y = ((float)rand() * 2.0 / (float)RAND_MAX - 1.0) * max_dist;
+        } while (x * x + y * y > max_dist * max_dist);
+        coordinates[n * 2] = y;
+        coordinates[n * 2 + 1] = x;
+    }
+
+    problem->distances = malloc(sizeof(float*) * problem->n_missions);
+
+    for (size_t y = 0; y < problem->n_missions; y++) {
+        problem->distances[y] = malloc(sizeof(float) * problem->n_missions);
+
+        for (size_t x = 0; x < problem->n_missions; x++) {
+            float dy = coordinates[x * 2] - coordinates[y * 2];
+            float dx = coordinates[x * 2 + 1] - coordinates[y * 2 + 1];
+
+            problem->distances[y][x] = sqrt(dx * dx + dy * dy);
+        }
+    }
+
+    problem->sessad_distances = malloc(sizeof(float) * problem->n_missions);
+
+    for (size_t x = 0; x < problem->n_missions; x++) {
+        float dy = coordinates[x * 2];
+        float dx = coordinates[x * 2 + 1];
+        problem->sessad_distances[x] = sqrt(dx * dx + dy * dy);
+    }
+
+    problem->coordinates = coordinates;
 }

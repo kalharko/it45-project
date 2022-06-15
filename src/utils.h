@@ -59,6 +59,10 @@ float time_table_waisted_time(const timetable_t* time_table, const problem_t* pr
 
 float kapa_distance(const problem_t* problem);
 
+/// Writes a problem into a directory, in CSV format
+void write_problem(const problem_t* problem, const char* path);
 
+/// Generate random points and sets the distances for problem based on them
+void problem_set_random_distances(problem_t* problem, float max_dist);
 
 #endif // UTILS_H
