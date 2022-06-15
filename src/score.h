@@ -6,7 +6,7 @@
 float score_solution(solution_t* solution, const problem_t* problem);
 
 
-float score_speciality(solution_t* solution, const problem_t* problem);
+float score_speciality(const solution_t* solution, const problem_t* problem);
 
 
 float score_distance(solution_t* solution, const problem_t* problem);

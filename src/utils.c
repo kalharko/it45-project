@@ -5,6 +5,8 @@
 
 #include "utils.h"
 #include "load.h"
+#include "constraints.h"
+#include "score.h"
 
 solution_t empty_solution(size_t n_assignments) {
     solution_t res;
@@ -113,16 +115,30 @@ void free_time_table(timetable_t time_table) {
     }
 }
 
-void print_solution(solution_t solution) {
+void print_solution(const solution_t* solution, const problem_t* problem) {
+    // Gather information
+    timetable_t time_table;
+    float wasted_time = 0;
+    float overtime = 0;
+    for (int i=0; i<problem->n_agents; i++) {
+        time_table = build_time_table(solution, problem, i);
+        wasted_time += time_table_waisted_time(&time_table, problem);
+        overtime += time_table_extra_hours(&time_table, problem);
+    }
+    free_time_table(time_table);
+
+    // Display
     printf("\n\nSolution\n");
-    printf("n_assignments\t\t : %zu\n[", solution.n_assignments);
+    printf("n_assignments\t\t : %zu\n[", solution->n_assignments);
     printf("assignments\t\t :");
-    for (int i=0; i<solution.n_assignments; i++) {
-        printf("%zu, ", solution.assignments[i]);
+    for (int i=0; i<solution->n_assignments; i++) {
+        printf("%zu, ", solution->assignments[i]);
     }
     printf("]\n");
-    printf("score\t\t\t : %f\n", solution.score);
-    printf("distance_traveled\t : %f\n", solution.distance_traveled);
+    printf("distance_traveled : \t%f\n", solution->distance_traveled);
+    printf("Speciality miss match : \t%f\n", score_speciality(solution, problem));
+    printf("Wasted time : \t\t%f\n", wasted_time);
+    printf("Overtime : \t\t%f\n", overtime);
 }
 
 
@@ -227,7 +243,7 @@ bool check_path(char* path, bool verbose) {
 float time_table_waisted_time(const timetable_t* time_table, const problem_t* problem)
 {
     float distance;
-    float waisted_time = 0;
+    float wasted_time = 0;
     float time;
     float speed = 50.0 * 1000.0 / 60.0; //833.333 m/min = 50km/h
 
@@ -237,12 +253,12 @@ float time_table_waisted_time(const timetable_t* time_table, const problem_t* pr
             for (size_t j = 0; j < time_table->lengths[day]-1; j++) {
                 time = problem->missions[assignments[j]].end_time - problem->missions[assignments[j]].start_time;
                 distance = problem->distances[j][j+1];
-                waisted_time += time - distance / speed;
+                wasted_time += time - distance / speed;
             }
         }
     }
 
-    return waisted_time;
+    return wasted_time;
 }
 
 float kapa_distance(const problem_t* problem)
@@ -252,4 +268,14 @@ float kapa_distance(const problem_t* problem)
         total += problem->sessad_distances[i];
     }
     return total / problem->n_missions;
+}
+
+FILE* log_file = NULL;
+void log_for_graph(const solution_t* solution, const problem_t* problem)
+{
+    float f_employees = score_harmony(solution, problem);
+    float f_students = score_speciality(solution, problem);
+    float f_SESSAD = score_SESSAD(solution, problem);
+
+    fprintf(log_file, "%.3f, %.3f, %.3f\n", f_employees, f_students, f_SESSAD);
 }

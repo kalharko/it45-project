@@ -176,6 +176,7 @@ solution_t optimize_solution(solution_t initial_solution, const problem_t* probl
         }
         // print_solution(next_solution);
 
+        log_for_graph(&current_solution, problem);
         temperature *= problem->temperature_mult;
     }
 

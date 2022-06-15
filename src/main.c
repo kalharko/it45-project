@@ -28,6 +28,9 @@ int main(int argc, char **argv) {
     }
     char concat_path[128];
 
+    // open file for logging
+    log_file = fopen("../log.csv", "w");
+
     double temperature = 10;
     double temperature_mult = 0.99;
     double temperature_threshold = 0.15;
@@ -97,7 +100,7 @@ int main(int argc, char **argv) {
     solution_t initial_solution = build_initial_solution(&problem, initial_params);
     score_solution(&initial_solution, &problem);
     printf("\nSolution initiale :\n");
-    print_solution(initial_solution);
+    print_solution(&initial_solution, &problem);
 
     if (initial_solution.score < 0.0) {
         fprintf(stderr, "No valid initial solution found!\n");
@@ -118,14 +121,16 @@ int main(int argc, char **argv) {
 
     // // Display and save result to file
     printf("\nFinal solution\n");
-    print_solution(solution);
+    print_solution(&solution, &problem);
 
-    printf("Objective 1 : nb of speciality miss match :\n\t%f\n", problem.validated_scores[0]);
-    printf("Objective 2 : total distance traveled\n\t%f\n", problem.validated_scores[1]);
-    printf("Objective 3 : overtime\n\t%f\n", problem.validated_scores[2]);
+    printf("\nObjectifs :\n");
+    printf("f_employees :\t\t%f\n", problem.validated_scores[0]);
+    printf("f_students :\t\t%f\n", problem.validated_scores[1]);
+    printf("f_SESSAD :\t\t%f\n", problem.validated_scores[2]);
 
     free_problem(problem);
     free_solution(solution);
+    fclose(log_file);
 
     return 0;
 }

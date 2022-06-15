@@ -9,28 +9,29 @@
 
 float score_solution(solution_t* solution, const problem_t* problem) {
     float score = 0;
+    int alpha = 100/ problem->n_missions; // alpha as described in the subject
 
     switch (problem->current_objective) {
         case 0 : // minimize the number of affectation with the wrong specialty
-            score = score_speciality(solution, problem);
+            score = score_harmony(solution, problem);
         break;
 
         case 1 : // minimize the total distance traveled
-            if (score_speciality(solution, problem) > problem->validated_scores[0]) {
+            if (score_harmony(solution, problem) > problem->validated_scores[0]) {
                 solution->score = -1;
                 return -1;
             }
-            score = score_distance(solution, problem);
+            score = score_speciality(solution, problem) * alpha;
         break;
 
         case 2 : // minimize the overtime
-            if (score_speciality(solution, problem) > problem->validated_scores[0] ||
-                score_distance(solution, problem) > problem->validated_scores[1]
+            if (score_harmony(solution, problem) > problem->validated_scores[0] ||
+                score_speciality(solution, problem) * alpha > problem->validated_scores[1]
             ) {
                 solution->score = -1;
                 return -1;
             }
-            score = score_overtime(solution, problem);
+            score = score_SESSAD(solution, problem);
         break;
 
         default :
@@ -44,7 +45,7 @@ float score_solution(solution_t* solution, const problem_t* problem) {
 
 
 // returns the number of assignments where the agent and mission specialty do not match
-float score_speciality(solution_t* solution, const problem_t* problem) {
+float score_speciality(const solution_t* solution, const problem_t* problem) {
     float score = 0;
 
     for (int i=0; i<solution->n_assignments; i++) {
@@ -56,8 +57,7 @@ float score_speciality(solution_t* solution, const problem_t* problem) {
         }
     }
 
-    int alpha = 100/ problem->n_missions; // alpha as described in the subject
-    return alpha * score;
+    return score;
 }
 
 
