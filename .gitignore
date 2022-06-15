@@ -276,7 +276,7 @@ TSWLatexianTemp*
 *.lpz
 
 # More latex stuff
-*.pdf
+#*.pdf
 *.log
 *.aux
 
