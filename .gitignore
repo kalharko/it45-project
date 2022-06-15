@@ -276,7 +276,7 @@ TSWLatexianTemp*
 *.lpz
 
 # More latex stuff
-*.pdf
+#*.pdf
 *.log
 *.aux
 
@@ -292,3 +292,5 @@ build/
 
 *.csv
 InstanceGenerator-*
+/edt.txt
+/log.csv

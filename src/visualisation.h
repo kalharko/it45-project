@@ -19,4 +19,6 @@ void log_for_graph(const solution_t* solution, const problem_t* problem);
 /// Saves a solution to a file
 void log_assignments(const solution_t* solution, const char* path, bool append);
 
+void save_agents_EDT(const solution_t* solution, const problem_t* problem);
+
 #endif // VISUALISATION_H

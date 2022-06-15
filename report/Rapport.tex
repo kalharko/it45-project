@@ -1,0 +1,412 @@
+%-------------------------------
+% Importer les packages et options du document
+%-------------------------------
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage [T1] {fontenc}
+
+% Geometry
+\usepackage{geometry}
+\geometry{a4paper}
+\geometry{margin=2.5cm}
+\setlength{\parskip}{1em}
+
+% Autres
+\usepackage{verbatim}
+\usepackage{tcolorbox}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{tabto}
+\usepackage{float}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{listings}
+
+% Hypper links package and it's configuration
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+
+%-------------------------------
+% Commandes custom
+%-------------------------------
+% Commande de saut, \myjump{taille du saut en cm} ou \myjump sans arguments
+\newcommand{\myjump}[1][0]{\mbox{}\\[#1cm]}
+
+% Pour faire une liste avec des paragraphes
+%\biglist{Titre du paragraphe} suite du paragraphe
+\newcommand{\biglist}[1]{\myjump[0]\indent\textsc{\textbf{#1}}}
+\newcommand{\scbf}[1]{\textsc{\textbf{#1}}}
+
+
+% Pour faire un commentaire à propos de ce qui devrait être écrit
+%\mycomment{Commentaire}
+\newcommand{\mycomment}[1]{
+\begin{center}
+    \small\sc
+    [#1]
+\end{center}
+}
+
+% Pour inclure une figure, elle sera automatiquement numérotée
+% \myfigure{chemin ver l'image}{Titre}
+\newcounter{nbFigures}
+\setcounter{nbFigures}{1}
+ \newcommand{\myfigure}[2]{
+\begin{center}
+    \fbox{
+    \includegraphics[width=0.8\linewidth]{#1}}\newline
+    \emph{Figure \arabic{nbFigures} : #2}
+    \stepcounter{nbFigures}
+\end{center}
+}
+
+% Pour écrire des ensembles finis de la forme [[a; b]], requiet stmaryrd
+\newcommand{\finset}[2]{\ensuremath{\llbracket\,#1;\;#2\,\rrbracket}}
+
+%--------------------------------
+% Options de la page de garde, début du document, table des matière
+%--------------------------------
+\title{\textbf{Dossier d'Analyse Conception}}
+\author{Adrien Burgun, Oscar Dewasmes}
+\date{UTBM - IT45 - Printemps 2022} % Si commenté, date du jour est utilisé
+
+
+\begin{document}
+
+\maketitle
+
+
+\newpage
+\tableofcontents
+
+
+\newpage
+\section{Introduction}
+
+Ce document est un rapport d'analyse conception préparant la réalisation du projet d'IT45 printemps 2022 à l'UTBM. Ce projet est réslisé par \emph{Adrien Burgun} et \emph{Oscar Dewasmes}. L'objectif est de mettre en place un algorithme de recherche optimisation pour résoudre un problème d'emplois du temps pour les intervenants du SESSAD.
+
+% Expliquer vite-fait le problème
+
+\newpage
+\section{Analyse}
+
+% Enlever cette partie?
+
+\subsection{Paramètres}
+
+% TODO: définir des macros pour diminuer l'espace entre les lettres des variables à deux lettres
+
+Nous avons identifié les paramètres suivants :
+\begin{itemize}
+    \item $n$ \tabto{2cm} le nombre d'agents du SESSAD
+    \item $m$ \tabto{2cm} le nombre de missions à réaliser dans une semaine
+    \item $v$ \tabto{2cm} la vitesse de déplacement des agents
+    \item $CA_i$ \tabto{2cm} la compétence que possède l'agent i
+    \item $SA_i$ \tabto{2cm} la spécialité de l'agent i
+    \item $CM_j$ \tabto{2cm} la compétence nécessaire à la mission i
+    \item $DM_j$ \tabto{2cm} la date du début de la mission $j$
+    \item $FM_j$ \tabto{2cm} la date de la fin de la mission $j$
+    \item $VH_i$ \tabto{2cm} le volume horaire de l'agent i
+\end{itemize}
+
+
+\subsection{Variables}
+
+
+
+
+
+Nous avons décidé de représenter une solution par une matrice binaire, dans la quelle chaque colonne représente une mission et chaque ligne représente un agent.
+
+\begin{center}
+\begin{tabular}{|c|c c c c|}
+\hline
+    & $m_0$ & $m_1$ & $\dots$ & $m_o$ \\\hline
+    $a_0$ & 1 & 0 & $\dots$ & 1 \\
+    $a_1$ & 0 & 1 & $\dots$ & 0 \\
+    $\vdots$ & $\vdots$ & $\vdots$ & & $\vdots$\\
+    $a_n$ & 0 & 0 & $\dots$ & 0 \\\hline
+\end{tabular}
+\end{center}
+
+
+\subsection{Objectifs}
+
+
+\begin{itemize}
+    \item Harmoniser la charge de travail et la distance parcourue entre les agents du SESSAD.
+    \item Minimiser le nombre d'affectation qui où l'agent n'a pas la bonne spécialité.
+    \item Minimiser le nombre d'heures supplémentaires, le nombre d'heures perdus et la distance totale parcouru.
+\end{itemize}
+
+
+
+\subsection{Contraintes}
+
+% Soit $CM_i$ la compétence requise pour la mission $i$ et $CA_j$ la compétence de l'agent $j$.
+
+Pour une solution $S \in \mathcal{M}_{n \times o}(\left\{0, 1\right\})$, on a les contraintes suivantes:
+
+\begin{enumerate}
+    \item Une mission ne peut être assignée qu'à un intervenant ayant la même compétence: $\forall (i, j), S_{ij} \Rightarrow CM_i = CA_j$
+    \item Chaque intervenant ne peut réaliser qu'une mission à la fois: $\forall i, \forall (j_1, j_2), S_{ij_1} \land S_{ij_2} \Rightarrow DM_{j_1} \geq FM_{j_2} + v\Delta_{j_1 j_2} \lor DM_{j_2} \geq FM_{j_1} + v\Delta_{j_1 j_2}$
+    \item Une mission est réalisée par un et un seul intervenant: $\forall i, \sum_{j=0}^n{S_{ij}} = 1$
+    \item Accorder à chaque intervenant au moins une heure de pause midi par jour entre midi et 14h.
+    Pour vérifier cette condition, on regarde l'heure de fin de la dernière mission avant 13h et l'heure de début de la première mission après 13h, et on s'assure qu'il y a au moins une heure entre les deux (en prenant compte du temps de trajet):
+    \begin{align*}
+        \delta^d_{i,t} =& \min_j(DM_j | S_{ij} \land \text{heure}(DM_j) \geq 13 \land \text{jour}(DM_j) = t) \\
+        \delta^f_{i,t} =& \max_j(FM_j + v\Delta_{j,j+1} | S_{ij} \land \text{heure}(FM_j) \leq 13 \land \text{jour}(FM_j) = t) \\
+        \forall (i, t),\; &\delta^d_{i,t} - \delta^f_{i,t} \geq 1
+    \end{align*}
+    \item Respecter les heures maximales à travailler par semaine ($VH_i$, pour lesquelles on compte le temps de la mission ainsi que le temps de trajet): \begin{align*}
+        \forall (i, t), T(i, t) &=
+            \sum_{j=0}^{n-1} \left\{FM_j - DM_j \;|\; S_{ij} \land \text{jour}(FM_j) = t \right\} \\
+            &+ \sum_{j=0,j'=0}^{\min(j,j') \leq n-1} \left\{ v\Delta_{jj'} \;|\; j \neq j' \land S_{ij} \land S_{ij'} \land \text{jour}(FM_j) = t \right\} \\
+            &+ v\Delta_{0,jmin} \quad \text{Avec:} \; jmin = \arg\min_j\left\{DM_j \;|\; S_{ij} \land \text{jour}(FM_j) = t
+            \right\} \\
+            &+ v\Delta_{jmax,0} \quad \text{Avec:} \; jmax = \arg\max_j\left\{FM_j \;|\; S_{ij} \land \text{jour}(FM_j) = t
+            \right\} \\
+        \forall i, \sum_t T(i, t) &\leq VH_i
+    \end{align*}
+    \item Respecter les heures maximales à travailler par jour: $\forall (i, t), T(i, t) \leq 10$
+    \item Respecter la limite des heures supplémentaires autorisées: $\forall i, \sum_t \max\{T-8,0\} = 10$
+    \item Respecter l'amplitude de la journée de travail de chaque intervenant: \begin{align*}
+        \forall (i, t),
+            \;& \max_j\left\{FM_j \;|\; S_{ij} \land \text{jour}(FM_j) \right\} \\
+            -& \min_j\left\{DM_j \;|\; S_{ij} \land \text{jour}(DM_j) \right\} \\
+            +&\, v\Delta_{0,jmin} + v\Delta_{jmax,0} \leq 12
+    \end{align*}
+\end{enumerate}
+
+
+% 2. Une mission ne peut ˆetre assign ́ee qu’`a un intervenant ayant la mˆeme comp ́etence,
+% 3. Chaque Intervenant ne peut r ́ealiser qu’une mission `a la fois,
+% 4. Une mission est r ́ealis ́ee par un et un seul Intervenant,
+% 5. Accorder `a chaque intervenant au moins une heure de pause-midi par jour entre midi et 14h,
+% 6. Respecter les heures maximales `a travailler par jour (Temps Plein = 8h/jour, Temps partiel =
+% 6h/jour),
+% 7. Respecter la limite des heures suppl ́ementaires autoris ́ees `a travailler par les intervenants sur le plan
+% de planification (heures suppl ́ementaires = 10h/semaine, 2h/jour),
+% 8. Respecter l’amplitude de la journ ́ee de travail de chaque intervenant (amplitude = 12h),
+% 9. Un intervenant doit avoir assez de temps pour se d ́eplacer d’une mission `a une autre.
+
+
+
+
+\newpage
+\section{Conception}
+
+Nous avons décidé de réaliser ce projet en c.
+
+
+\subsection{Algorithme}
+
+Nous allons implémenter l'algorithme du \emph{recuit}. Pour cela nous allons avoir besoin de déterminer une solution finale, une fonction d'évaluation et un moyen de déterminer les voisins d'une solution.
+
+
+\subsubsection{Solution initiale}
+
+Pour pouvoir initier l'algorithme du \emph{recuit}, il faut déterminer une solution initiale.
+Pour cela, nous utilisons une forme relaxée des règles:
+
+\begin{itemize}
+    \item Une mission peut ne pas être réalisée
+    \item On peut dépasser les heures maximales à travailler par jour
+    \item On peut dépasser la limite des heures supplémentaires autorisées
+    \item On peut ne pas respecter l'amplitude de la journée de travail
+\end{itemize}
+
+On commence par affecter à tous les agent du SESSAD une mission par jour qui convient parfaitement à leur compétences et leur spécialité.
+Puis nous répétons le processus jusqu'à ce que l'on ne puisse plus faire d'affectation.
+De la même manière, on affecte ensuite aux agents du SESSAD des missions non optimales où leur spécialité ne correspond pas.
+Lorsque l'on ne peut à nouveau plus faire d'affectation, on vérifie si les conditions sont toutes remplies.
+Si elles le sont, alors on prend cette solution comme solution initiale et on procède à la suite de l'algorithme.
+
+Si une ou plusieurs conditions ne sont pas remplies, alors on procède à chercher une solution initiale par algorithme génétique:
+
+\begin{itemize}
+    \item Le génome est constitué de $n$ gènes $g_j \in Agents \cup \{ \varnothing \}$
+    \item On convertit chaque génome $g$ en une solution $S$ avec la relation $S_{ij} \Leftrightarrow g_j = i$
+    \item On donne un score à chaque individu: si la solution $S$ ne remplit pas les règles relaxées, alors il obtient une pénalité de $\infty$; sinon, elle obtient une pénalité proportionnelle au temps dépassant les limites des règles strictes et au nombre de missions non-réalisées
+    \item On élimine tous les individus ayant une pénalité de $\infty$, ainsi que les individus ayant la plus haute pénalité
+    \item Une partie des meilleurs individus obtient le droit de se reproduire: l'opérateur de croisement revient à choisir un jour $t$ et à échanger les gènes de ce jour: $\left\{g_j \;|\; \text{jour}(FM_j) = t \right\}$
+    \item L'étape de mutation se fait en modifiant un ou plusieurs gènes
+    \item Un faible nombre d'individus neufs sont introduits, afin de maintenir la diversité du bassin génétique
+\end{itemize}
+
+Une fois que le meilleur individu a un score nul, on le choisit comme solution initiale.
+
+\subsubsection{Fonction d'évaluation}
+
+La fonction d'évaluation se sépare en 2 étapes, la vérification de la validité de la solution puis l'évaluation de la solution par rapport aux objectifs. Pour vérifier la validité de la solution, nous allons vérifier les contraintes une à unes.\newline
+
+Pour évaluer la solution nous pouvons prendre en compte ses caractéristiques suivantes :
+\begin{itemize}
+    \item $c_0$ = Nombre de mission assignées
+    \item $c_1$ = Nombre de missions assignées à un agent qui n'a pas la bonne spécialité
+    \item $c_2$ = Nombre d'heures supplémentaires
+    \item $c_3$ = Distance totale parcourue
+\end{itemize}
+\tabto{1.3cm}$\vdots$
+
+Ainsi le score d'une solution serait calculé ainsi :\newline
+\tabto{2cm} $score = \lambda_0 c_0 + \lambda_1 c_1 + \lambda_2 c_2 + \dots +\lambda_n c_n$ \newline
+Avec $\lambda_i$ l'importance que nous assignons au critère $i$. Par exemple le nombre d'heure supplémentaire est un critère que nous voulons beaucoup minimiser, ainsi son $\lambda$ associé serait une grande valeur négative.
+
+
+
+\subsubsection{Déterminer les voisins d'une solution}
+
+Pour déterminer une solution voisine à la solution actuel, une mission et un agent sont choisis au hasard. Cet agent remplace celui qui était affecté précédemment à la mission. Si cette nouvelle affectation n'est pas valide, une nouvelle mission et un nouvel agent sont tirés au hasard jusqu'à ce que une affectation valide apparaisse.
+
+
+\newpage
+\subsubsection{Algorithme du recuit}
+
+\myfigure{Images/Flowchart_recuit.pdf}{Flow chart représentant l'exécution de l'algorithme du recuit}
+
+Le flow chart ci-dessus représente les étapes constituant l'algorithme du \emph{recuit}. À cause de l'étape de sélection d'un voisin aléatoire et l'acceptation de la prochaine solution basé sur une probabilité; cet algorithme peut donner différents résultats. C'est pour cela qu'il est appliqué plusieurs fois à un même problème, pour contrecarrer la possibilité d'aberrances probabilistes qui nous éloigneraient de la solution optimale.
+
+
+
+
+
+
+\newpage
+\section{Réalisation}
+
+\noindent Par rapport à notre analyse initiale, nous avons ajusté notre approche sur les points suivants :
+\begin{itemize}
+    \item Évaluation multi-objetif en cascade au lieu de moyenne pondérée.
+    \item La solution est maintenant représenté par une liste d'assignation $x_i = j$ où la mission $i$ est assigné à l'agent $j$.
+    \item Certaines contraintes, comme l'assignation unique d'une solution, sont directement prises en compte par la forme de la solution.
+    \item Pour palier à la nature aléatoire du \emph{recuit}, l'optimisation peut être lancée plusieurs fois pour garder la meilleur solution.
+\end{itemize}
+
+
+\myjump
+Nous avons aussi instauré des test unitaires en utilisant la librairie \emph{unity}. Cela nous a permit de s'assurer de la qualité du code que nous avons écrit.
+
+\myjump
+La dernière mesure que nous avons prise pour s'assurer de la qualité du code est l'utilisation de \emph{valgrind} qui permet la détection des fuites de mémoire.
+
+
+
+\section{Résultats}
+
+
+\subsection{Taux de succès des fonctions d'initialisation}
+
+Nous avons mesuré le taux de succès des deux fonctions d'initialisation (l'heuristique \og naïve \fg et l'algorithme génétique), en fonction du nombre d'agents et du nombre de missions.
+Plus précisément, nous mesurons
+$$
+\text{perf} = \mathbb{E}(\text{valid}(f(X, \text{Seed})) \;\vert\; \varepsilon)
+$$
+Avec $X$ un problème suivant une loi uniforme pour les compétences, spécialisations, horaires et durées; $f$ la fonction donnant une solution initiale à mesurer et $\varepsilon = (\texttt{n\_agents}, \texttt{n\_missions})$
+
+Pour $f_1 = \texttt{build\_naive}$ (heuristique seulement), on obtient la distribution suivante:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{Images/naive.png}
+    \caption{Taux de succès de \texttt{build\_naive}}
+    \label{fig:naive_success}
+\end{figure}
+
+Pour $f_2 = \texttt{build\_initial\_solution}$ (algorithme génétique), on obtient la distribution suivante:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{Images/initial.png}
+    \caption{Taux de succès de \texttt{build\_initial\_solution}}
+    \label{fig:initial_success}
+\end{figure}
+
+Et voici la distribution de $\mathbb{E}(\neg \text{valid}(f_1(X, \text{Seed})) \land \text{valid}(f_2(X, \text{Seed})) \;\vert\; \varepsilon)$, qui représente la contribution de l'algorithme génétique à trouver une solution initiale:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{Images/initial-diff.png}
+    \caption{Différence du taux de succès de \texttt{build\_naive} et \texttt{build\_initial\_solution} (échelle ré-ajustée)}
+    \label{fig:diff_success}
+\end{figure}
+
+\subsection{Évolution des objectifs au cours de la résolution}
+
+Ci dessous est représenté l'évolution des objectifs au fil des itérations. Les barres verticales représentent le changement d'objectif dans la cascade.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images/score_evolution_graph.png}
+    \caption{Évolution des objectifs au fil des itérations}
+    \label{fig:score_evolution}
+\end{figure}
+
+\subsection{Visualisations de la solution}
+
+\begin{figure}[H]
+    \caption{Chemin tracé par les agents dans la solution initiale ($\Sigma = 1063.87 \pm 15.15$ km)}
+    \input{initial.tex}
+\end{figure}
+
+\begin{figure}[H]
+    \caption{Chemin tracé par les agents dans la solution finale ($\Sigma = 1096.43 \pm 1.16$ km)}
+    \input{final.tex}
+\end{figure}
+
+
+\newpage
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}
+TRAJ 		TP 1 	lundi 	7:56 	8:00 	1 	Distanciel
+MISS 		CM 1 	lundi 	8:00 	12:00 	1 	Distanciel
+TRAJ 		TP 1 	lundi 	12:00 	12:03 	1 	Distanciel
+TRAJ 		TP 1 	lundi 	13:50 	14:00 	1 	Distanciel
+MISS 		CM 1 	lundi 	14:00 	17:00 	1 	Distanciel
+TRAJ 		TP 1 	lundi 	17:00 	17:09 	1 	Distanciel
+    \end{lstlisting}
+    \caption{Extrait d'un emploi du temps généré par le programme}
+    \label{fig:edt_raw}
+\end{figure}
+
+
+Pour générer une image à partir de l'emploi du temps créé par le programme, nous utilisons le site web de conversion d'emploi du temps UTBM créé par un élève : \href{https://codepen.io/TheRolf/full/gGbBoY?fbclid=IwAR0FcviTmRmV4PZjW4q8sscpVDDdAWsLMJvw682CjDEalOuPSbtQtzLUV24}{Générateur d'emploi du temps UTBM}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/edt.png}
+    \caption{Image rendu de l'emploi du temps d'un agent}
+    \label{fig:edt}
+\end{figure}
+
+
+
+\newpage
+\section{Conclusion}
+
+Le code source du projet est disponible sur \emph{Github} :\newline \href{https://github.com/kalharko/it45-project}{github.com/kalharko/it45-project}
+
+\subsection{Pistes d'amélioration}
+\begin{itemize}
+    \item Lorsque le programme est lancé avec plusieurs itérations pour garder la meilleur solution, seul le premier objectif de la cascade est pris en compte pour choisir la meilleur solution.
+    \item Génération d'instances du problème complètement intégré au programme à des fins de test.
+    \item Plus de tests unitaires.
+\end{itemize}
+
+
+
+\end{document}
