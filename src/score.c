@@ -112,6 +112,7 @@ float score_harmony(const solution_t* solution, const problem_t* problem) {
     }
     waisted_hours_sd /= problem->n_agents;
     waisted_hours_sd = sqrt(waisted_hours_sd);
+    waisted_hours_sd /= 60; // convert to hours
 
     // Compute stddev(overtime)
 
@@ -129,6 +130,7 @@ float score_harmony(const solution_t* solution, const problem_t* problem) {
     }
     overtime_sd /= problem->n_agents;
     overtime_sd = sqrt(overtime_sd);
+    overtime_sd /= 60; // convert to hours
 
     // Compute stddev(distance)
 
@@ -209,7 +211,7 @@ float score_SESSAD(const solution_t* solution, const problem_t* problem)
     float beta = 100 / 45; // 45 = max nb of work hours in a week
     float kapa = 100 / kapa_distance(problem);
 
-    out = beta * sumWHO;
+    out = beta * sumWHO / 60; // convert to hours
     out += kapa * distance_mean;
     out += kapa * distance_max;
     out /= 3;

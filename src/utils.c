@@ -244,7 +244,7 @@ float kapa_distance(const problem_t* problem)
     for (int i=0; i<problem->n_missions; i++) {
         total += problem->sessad_distances[i];
     }
-    return total / problem->n_missions;
+    return total / problem->n_agents;
 }
 
 void write_problem(const problem_t* problem, const char* path) {
