@@ -290,4 +290,5 @@ build/
 
 # My random stuff
 
+*.csv
 InstanceGenerator-*

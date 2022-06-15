@@ -52,7 +52,7 @@ float score_speciality(const solution_t* solution, const problem_t* problem) {
         size_t assignment = solution->assignments[i];
         if (assignment > SIZE_MAX) continue;
 
-        if (problem->missions[assignment].speciality != problem->agents[assignment].speciality) {
+        if (problem->missions[i].speciality != problem->agents[assignment].speciality) {
             score += 1.0;
         }
     }
@@ -81,11 +81,21 @@ float score_overtime(solution_t* solution, const problem_t* problem) {
 float score_harmony(const solution_t* solution, const problem_t* problem) {
     // // Waisted hours
     float waisted_hours[problem->n_agents];
-    timetable_t time_table;
-    // gather waisted hours
+    // Distance
+    float distances[problem->n_agents];
+    // Overtime hours
+    float overtime_hours[problem->n_agents];
+
+    // gather waisted hours, distance and overtime hours
     for (int i=0; i<problem->n_agents; i++) {
-        time_table = build_time_table(solution, problem, i);
+        timetable_t time_table = build_time_table(solution, problem, i);
         waisted_hours[i] = time_table_waisted_time(&time_table, problem);
+        overtime_hours[i] = time_table_extra_hours(&time_table, problem);
+        distances[i] = 0;
+        for (int day=0; day<N_DAYS; day++) {
+            distances[i] += time_table_distance(&time_table, problem, day);
+        }
+        free_time_table(time_table);
     }
 
     // mean
@@ -103,14 +113,7 @@ float score_harmony(const solution_t* solution, const problem_t* problem) {
     waisted_hours_sd /= problem->n_agents;
     waisted_hours_sd = sqrt(waisted_hours_sd);
 
-
-    // // Overtime hours
-    float overtime_hours[problem->n_agents];
-    // gather waisted hours
-    for (int i=0; i<problem->n_agents; i++) {
-        time_table = build_time_table(solution, problem, i);
-        overtime_hours[i] = time_table_extra_hours(&time_table, problem);
-    }
+    // Compute stddev(overtime)
 
     // mean
     float overtime_mean = 0;
@@ -127,17 +130,7 @@ float score_harmony(const solution_t* solution, const problem_t* problem) {
     overtime_sd /= problem->n_agents;
     overtime_sd = sqrt(overtime_sd);
 
-
-    // // Distance
-    float distances[problem->n_agents];
-    // gather distance
-    for (int i=0; i<problem->n_agents; i++) {
-        time_table = build_time_table(solution, problem, i);
-        distances[i] = 0;
-        for (int day=0; day<N_DAYS; day++) {
-            distances[i] += time_table_distance(&time_table, problem, day);
-        }
-    }
+    // Compute stddev(distance)
 
     // mean
     float distance_mean = 0;
@@ -162,7 +155,7 @@ float score_harmony(const solution_t* solution, const problem_t* problem) {
     regime_mean /= problem->n_agents;
 
     // // final calcul
-    float out;
+    float out = 0.0;
 
     float zeta = 100 / regime_mean;
     float lambda = 100 / 10;        // 10 is number of tolerated overtime per week
@@ -182,20 +175,16 @@ float score_SESSAD(const solution_t* solution, const problem_t* problem)
 
     // // sumWHO
     float sumWHO = 0;
-    timetable_t time_table;
-    // gather waisted hours
-    for (int i=0; i<problem->n_agents; i++) {
-        time_table = build_time_table(solution, problem, i);
-        sumWHO += time_table_waisted_time(&time_table, problem);
-        sumWHO += time_table_extra_hours(&time_table, problem);
-    }
 
     // // Distance
     float distances[problem->n_agents];
     float distance_max = 0;
-    // gather distance
+    // gather distance and wasted hours
     for (int i=0; i<problem->n_agents; i++) {
-        time_table = build_time_table(solution, problem, i);
+        timetable_t time_table = build_time_table(solution, problem, i);
+        sumWHO += time_table_waisted_time(&time_table, problem);
+        sumWHO += time_table_extra_hours(&time_table, problem);
+
         distances[i] = 0;
         for (int day=0; day<N_DAYS; day++) {
             distances[i] += time_table_distance(&time_table, problem, day);
@@ -203,6 +192,8 @@ float score_SESSAD(const solution_t* solution, const problem_t* problem)
         if (distances[i] > distance_max) {
             distance_max = distances[i];
         }
+
+        free_time_table(time_table);
     }
 
     // mean
