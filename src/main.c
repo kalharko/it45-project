@@ -159,6 +159,9 @@ int main(int argc, char **argv) {
     printf("f_students :\t\t%f\n", problem.validated_scores[1]);
     printf("f_SESSAD :\t\t%f\n", problem.validated_scores[2]);
 
+    // // Save agents time tables
+    save_agents_EDT(&final_solution, &problem);
+
     // // Free Memory
     // problem_set_random_distances(&problem, 10000);
     // write_problem(&problem, "../Instances/with-pos");

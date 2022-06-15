@@ -292,3 +292,5 @@ build/
 
 *.csv
 InstanceGenerator-*
+/edt.txt
+/log.csv

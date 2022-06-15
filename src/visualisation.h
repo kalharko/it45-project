@@ -17,4 +17,6 @@ void print_solution(const solution_t *solution, const problem_t* problem);
 void log_for_graph(const solution_t* solution, const problem_t* problem);
 
 
+void save_agents_EDT(const solution_t* solution, const problem_t* problem);
+
 #endif // VISUALISATION_H

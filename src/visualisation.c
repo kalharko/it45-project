@@ -44,3 +44,81 @@ void log_for_graph(const solution_t* solution, const problem_t* problem)
 
     fprintf(log_file, "%.3f, %.3f, %.3f\n", f_employees, f_students, f_SESSAD);
 }
+
+
+void save_agents_EDT(const solution_t* solution, const problem_t* problem)
+{
+    FILE* file = fopen("../edt.txt", "w");
+    float speed = 50.0 * 1000.0 / 60.0; //833.333 m/min = 50km/h
+    char jours[5][15] = {
+        "lundi",
+        "mardi",
+        "mercredi",
+        "jeudi",
+        "vendredi"
+    };
+
+    timetable_t time_table;
+    for (int a=0; a<problem->n_agents; a++)
+    {
+        time_table = build_time_table(solution, problem, a);
+        for (int day=0; day<N_DAYS; day++) {
+            for (int i=0; i<time_table.lengths[day]; i++) {
+                int time = problem->missions[time_table.assignments[day][i]].start_time;
+                time -= problem->sessad_distances[time_table.assignments[day][i]] / speed;
+                fprintf(file, "TRAJ \t\t");
+                fprintf(file, "TP 1 \t");
+                fprintf(file, "%s \t", jours[day-1]);
+                fprintf(file, "%d:", time/60);
+                if (time%60 <10) {
+                    fprintf(file, "0");
+                }
+                fprintf(file, "%d \t", time%60);
+                fprintf(file, "%d:", problem->missions[time_table.assignments[day][i]].start_time/60);
+                if (problem->missions[time_table.assignments[day][i]].start_time%60 <10) {
+                    fprintf(file, "0");
+                }
+                fprintf(file, "%d \t", problem->missions[time_table.assignments[day][i]].start_time%60);
+                fprintf(file, "1 \t");
+                fprintf(file, "Distanciel \t\n");
+
+                fprintf(file, "MISS \t\t");
+                fprintf(file, "CM 1 \t");
+                fprintf(file, "%s \t", jours[day-1]);
+                fprintf(file, "%d:", problem->missions[time_table.assignments[day][i]].start_time/60);
+                if (problem->missions[time_table.assignments[day][i]].start_time%60 <10) {
+                    fprintf(file, "0");
+                }
+                fprintf(file, "%d \t", problem->missions[time_table.assignments[day][i]].start_time%60);
+                fprintf(file, "%d:", problem->missions[time_table.assignments[day][i]].end_time/60);
+                if (problem->missions[time_table.assignments[day][i]].end_time%60 <10) {
+                    fprintf(file, "0");
+                }
+                fprintf(file, "%d \t", problem->missions[time_table.assignments[day][i]].end_time%60);
+                fprintf(file, "1 \t");
+                fprintf(file, "Distanciel \t\n");
+
+                time = problem->missions[time_table.assignments[day][i]].end_time;
+                time += problem->sessad_distances[time_table.assignments[day][i]] / speed;
+                fprintf(file, "TRAJ \t\t");
+                fprintf(file, "TP 1 \t");
+                fprintf(file, "%s \t", jours[day-1]);
+                fprintf(file, "%d:", problem->missions[time_table.assignments[day][i]].end_time/60);
+                if (problem->missions[time_table.assignments[day][i]].end_time%60 <10) {
+                    fprintf(file, "0");
+                }
+                fprintf(file, "%d \t", problem->missions[time_table.assignments[day][i]].end_time%60);
+                fprintf(file, "%d:", time/60);
+                if (time%60 <10) {
+                    fprintf(file, "0");
+                }
+                fprintf(file, "%d \t", time%60);
+                fprintf(file, "1 \t");
+                fprintf(file, "Distanciel \t\n");
+            }
+        }
+        fprintf(file, "\n");
+    }
+
+    fclose(file);
+}
