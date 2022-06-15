@@ -65,7 +65,7 @@ if (${OpenMP_C_FOUND})
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         target_compile_options(it45-project-bench PRIVATE -O3 -pthread -fopenmp)
-    elif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_compile_options(it45-project-bench PRIVATE -O3 -pthread -fopenmp=libomp)
     else()
         target_compile_options(it45-project-bench PRIVATE -O3 -pthread)
