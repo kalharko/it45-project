@@ -207,12 +207,15 @@ bool is_solution_valid(solution_t* solution, const problem_t* problem) {
         for (int day = 1; day < N_DAYS; day++) {
             distance = time_table_distance(&time_table, problem, day);
             if (distance == -1) {
+                free_time_table(time_table);
                 return false;
             }
             else {
                 solution->distance_traveled += distance;
             }
         }
+
+        free_time_table(time_table);
     }
 
     return true;

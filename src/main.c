@@ -79,6 +79,11 @@ int main(int argc, char **argv) {
     strcat(concat_path, "Distances.csv");
     load_distances(problem.n_missions+1, concat_path, distances);
     load_distances_into_problem(&problem, distances);
+    for (size_t n = 0; n < problem.n_missions+1; n++) {
+        free(distances[n]);
+    }
+    free(distances);
+    distances = NULL;
 
 
     // // Initial solution
