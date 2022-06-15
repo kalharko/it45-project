@@ -62,8 +62,16 @@ add_executable(it45-project-bench
 find_package(OpenMP)
 if (${OpenMP_C_FOUND})
     target_link_libraries(it45-project-bench m OpenMP::OpenMP_C)
-    target_compile_options(it45-project-bench PRIVATE -O3 -pthread -fopenmp=libomp)
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(it45-project-bench PRIVATE -O3 -pthread -fopenmp)
+    elif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(it45-project-bench PRIVATE -O3 -pthread -fopenmp=libomp)
+    else()
+        target_compile_options(it45-project-bench PRIVATE -O3 -pthread)
+    endif()
 else()
+    target_link_libraries(it45-project-bench m)
     target_compile_options(it45-project-bench PRIVATE -O3)
 endif()
 
