@@ -110,6 +110,7 @@ int main(int argc, char **argv) {
 
         solution_t initial_solution = build_initial_solution(&problem, initial_params);
         score_solution(&initial_solution, &problem);
+        log_assignments(&initial_solution, "initial-solution.csv", false);
         //printf("\nSolution initiale :");
         //print_solution(&initial_solution, &problem);
 
@@ -153,6 +154,7 @@ int main(int argc, char **argv) {
     // // Display
     printf("\n\n===== Final solution =====\n");
     print_solution(&final_solution, &problem);
+    log_assignments(&final_solution, "final-solution.csv", false);
 
     printf("\nObjectifs :\n");
     printf("f_employees :\t\t%f\n", problem.validated_scores[0]);

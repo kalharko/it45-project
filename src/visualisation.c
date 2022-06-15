@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <assert.h>
 
 #include "visualisation.h"
 #include "score.h"
@@ -43,4 +43,25 @@ void log_for_graph(const solution_t* solution, const problem_t* problem)
     float f_SESSAD = score_SESSAD(solution, problem);
 
     fprintf(log_file, "%.3f, %.3f, %.3f\n", f_employees, f_students, f_SESSAD);
+}
+
+void log_assignments(const solution_t* solution, const char* path, bool append) {
+    FILE* file;
+    if (append) {
+        file = fopen(path, "a");
+    } else {
+        file = fopen(path, "w");
+    }
+
+    assert(file != NULL);
+
+    bool first = true;
+    for (size_t n = 0; n < solution->n_assignments; n++) {
+        if (first) first = false;
+        else fprintf(file, ",");
+        fprintf(file, "%zu", solution->assignments[n]);
+    }
+    fprintf(file, "\n");
+
+    fclose(file);
 }
