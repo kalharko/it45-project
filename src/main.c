@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 
 
     // // Initialize the problem and load data from csv
-    problem_t problem;
+    problem_t problem = empty_problem();
     problem.current_objective = 0;
     problem.temperature = temperature;
     problem.temperature_mult = temperature_mult;
@@ -160,6 +160,9 @@ int main(int argc, char **argv) {
     printf("f_SESSAD :\t\t%f\n", problem.validated_scores[2]);
 
     // // Free Memory
+    // problem_set_random_distances(&problem, 10000);
+    // write_problem(&problem, "../Instances/with-pos");
+
     free_problem(problem);
     free_solution(final_solution);
     fclose(log_file);
