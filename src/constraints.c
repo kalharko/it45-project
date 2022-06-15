@@ -135,7 +135,7 @@ float time_table_distance(const timetable_t* time_table, const problem_t* proble
         time -= problem->missions[assignments[a]].end_time;
 
         if (!(distance / speed <= time)) {
-            return -1;
+            return distance / speed - time;
         }
     }
 

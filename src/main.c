@@ -3,6 +3,8 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <math.h>
+#include <limits.h>
 #include "defs.h"
 #include "load.h"
 #include "initial.h"
@@ -16,8 +18,8 @@
 #endif
 
 int main(int argc, char **argv) {
-    if (argc != 4) {
-        printf("Usage : ./it45-project <path to folder data> <nb of iteration> <cut off>\n");
+    if (argc < 3) {
+        printf("Usage : ./it45-project <path to folder data> <nb of iteration> [cut off]\n");
         return 1;
     }
 
@@ -30,14 +32,14 @@ int main(int argc, char **argv) {
     char concat_path[128];
 
     int n_iterations = atoi(argv[2]);
-    int cut_off = atoi(argv[3]);
+    int cut_off = argc >= 4 ? atoi(argv[3]) : INT_MAX;
 
     // open file for logging
     log_file = fopen("../log.csv", "w");
 
-    double temperature = 10; //20
+    double temperature = 150; //20
     double temperature_mult = 0.99; //0.995
-    double temperature_threshold = 0.15; //4
+    double temperature_threshold = 0.1; //4
 
     // Initializes random number generator
     #ifdef unix
@@ -99,7 +101,7 @@ int main(int argc, char **argv) {
     initial_params.survival_rate = 0.5;
     initial_params.reproduction_rate = 0.25;
     initial_params.mutation_rate = 0.25;
-    initial_params.unassigned_penalty = 30.0; // how many minutes an unassigned mission is worth
+    initial_params.unassigned_penalty = 120.0; // how many minutes an unassigned mission is worth
 
     solution_t final_solution = empty_solution(problem.n_missions);
     float final_employees = INFINITY;
@@ -109,22 +111,25 @@ int main(int argc, char **argv) {
         printf("\n\n====== Iteration %d ======\n", iteration);
 
         solution_t initial_solution = build_initial_solution(&problem, initial_params);
-        score_solution(&initial_solution, &problem);
-        log_assignments(&initial_solution, "initial-solution.csv", false);
-        //printf("\nSolution initiale :");
-        //print_solution(&initial_solution, &problem);
+        // printf("\nSolution initiale :");
+        // print_solution(&initial_solution, &problem);
 
         if (initial_solution.score < 0.0) {
             fprintf(stderr, "No valid initial solution found!\n");
-            return 127;
+            // score_solution(&initial_solution, &problem);
+            // log_assignments(&initial_solution, "initial-solution.csv", false);
+            continue;
         }
+
+        score_solution(&initial_solution, &problem);
+        log_assignments(&initial_solution, "initial-solution.csv", false);
 
 
         // // Launch optimization
         // optimises for each objective
         solution_t solution = initial_solution;
         for (int i = 0; i < 3; i++) {
-            printf("\nOptimize objective %d", i);
+            printf("Optimize objective %d\n", i);
             problem.current_objective = i;
             problem.temperature = temperature;
             solution = optimize_solution(solution, &problem, cut_off);
@@ -134,9 +139,11 @@ int main(int argc, char **argv) {
         // // check if it is the best solution encountered yet
         if (problem.validated_scores[0] < final_employees) {
             final_employees = problem.validated_scores[0];
-            final_solution.distance_traveled = solution.distance_traveled;
-            free(final_solution.assignments);
-            final_solution.assignments = solution.assignments;
+            final_students = problem.validated_scores[1];
+            final_SESSAD = problem.validated_scores[2];
+            // final_solution.distance_traveled = solution.distance_traveled;
+            free_solution(final_solution);
+            final_solution = solution;
             printf("  Solution améliorée, f_employees : %f\n", final_employees);
             print_solution(&solution, &problem);
         } else {
@@ -160,9 +167,9 @@ int main(int argc, char **argv) {
     log_assignments(&final_solution, "final-solution.csv", false);
 
     printf("\nObjectifs :\n");
-    printf("f_employees :\t\t%f\n", problem.validated_scores[0]);
-    printf("f_students :\t\t%f\n", problem.validated_scores[1]);
-    printf("f_SESSAD :\t\t%f\n", problem.validated_scores[2]);
+    printf("f_employees :\t\t%f\n", final_employees);
+    printf("f_students :\t\t%f\n", final_students);
+    printf("f_SESSAD :\t\t%f\n", final_SESSAD);
 
     // // Save agents time tables
     save_agents_EDT(&final_solution, &problem);

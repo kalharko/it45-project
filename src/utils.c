@@ -238,13 +238,25 @@ float time_table_waisted_time(const timetable_t* time_table, const problem_t* pr
     return wasted_time;
 }
 
-float kapa_distance(const problem_t* problem)
-{
+// This function was defined in contradicting ways; following is the average of all distances:
+// float kapa_distance(const problem_t* problem) {
+//     float total = 0;
+//     for (int i=0; i<problem->n_missions; i++) {
+//         for (int j=0; j<problem->n_missions; j++) {
+//             total += problem->distances[i][j];
+//         }
+//         total += 2 * problem->sessad_distances[i];
+//     }
+//     return total / (problem->n_missions + 1) / (problem->n_missions + 1);
+// }
+
+// Following is the average of the distances from the SESSAD to the missions
+float kapa_distance(const problem_t* problem) {
     float total = 0;
     for (int i=0; i<problem->n_missions; i++) {
         total += problem->sessad_distances[i];
     }
-    return total / problem->n_agents;
+    return total / problem->n_missions;
 }
 
 void write_problem(const problem_t* problem, const char* path) {

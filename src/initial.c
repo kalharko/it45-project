@@ -15,11 +15,11 @@ bool is_initial_assignment_valid_sub(const timetable_t* time_table, const proble
     }
 
     // Check that no missions overlap
-    for (size_t day = 0; day < N_DAYS; day++) {
-        if (time_table_distance(time_table, problem, day) < 0.0) {
-            return false;
-        }
-    }
+    // for (size_t day = 0; day < N_DAYS; day++) {
+    //     if (time_table_distance(time_table, problem, day) < 0.0) {
+    //         return false;
+    //     }
+    // }
 
     // Check that there is a lunch break
     if (!has_lunch_break(time_table, problem)) {
@@ -168,6 +168,9 @@ float initial_score(
         float extra_work_time = 0;
 
         for (size_t day = 0; day < N_DAYS; day++) {
+            float dist = time_table_distance(&time_table, problem, day);
+            if (dist < 0.0) score += -dist;
+
             float work_time = calc_day_work_time(&time_table, problem, day);
 
             total_work_time += work_time;
