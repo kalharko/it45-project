@@ -135,9 +135,12 @@ int main(int argc, char **argv) {
         if (problem.validated_scores[0] < final_employees) {
             final_employees = problem.validated_scores[0];
             final_solution.distance_traveled = solution.distance_traveled;
+            free(final_solution.assignments);
             final_solution.assignments = solution.assignments;
             printf("  Solution améliorée, f_employees : %f\n", final_employees);
             print_solution(&solution, &problem);
+        } else {
+            free_solution(solution);
         }
 
         // // Reset for next iteration

@@ -62,6 +62,8 @@ void log_assignments(const solution_t* solution, const char* path, bool append) 
         fprintf(file, "%zu", solution->assignments[n]);
     }
     fprintf(file, "\n");
+
+    fclose(file);
 }
 
 void save_agents_EDT(const solution_t* solution, const problem_t* problem)
